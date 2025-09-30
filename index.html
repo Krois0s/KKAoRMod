@@ -124,27 +124,52 @@
         details:not([open]) > summary {
             padding: 5px 10px;
         }
+
+        /* ドラッグ＆ドロップ用オーバーレイ */
+        #drag-overlay:not(.hidden) {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 123, 255, 0.7);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+            pointer-events: none; /* マウスイベントを透過させる */
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Age of Reforging キャラクターエディタ</h1>
-        <p style="color: #c0392b;"><b>【重要】利用上の注意</b><br>
-            <b>・編集前に必ずセーブデータのバックアップを取ってください。</b><br>
-            ・各項目の変更がゲームに与える影響は未知数です。予期せぬ動作を引き起こす可能性があります。<br>
-            ・<b>このツールで編集したセーブデータに起因する不具合について、公式開発元へのお問い合わせは絶対に行わないでください。</b><br>
-            ・セーブデータの破損について一切の責任を負いません。（<a href="https://x.com/Kr_x" target="_blank">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します）</p>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <h1 data-i18n="title">Age of Reforging キャラクターエディタ</h1>
+            <div id="lang-switcher" style="margin-top: 10px; display: flex; gap: 5px;">
+                <button id="lang-ja" type="button" style="padding: 5px 10px; font-size: 12px;">日本語</button>
+                <button id="lang-en" type="button" style="padding: 5px 10px; font-size: 12px;">English</button>
+            </div>
+        </div>
+        <p style="color: #c0392b;"><b data-i18n="important_notes_title">【重要】利用上の注意</b><br>
+            <b data-i18n="important_backup">・編集前に必ずセーブデータのバックアップを取ってください。</b><br>
+            <span data-i18n="important_unknown_effects">・各項目の変更がゲームに与える影響は未知数です。予期せぬ動作を引き起こす可能性があります。</span><br>
+            <b data-i18n="important_no_official_contact">・このツールで編集したセーブデータに起因する不具合について、公式開発元へのお問い合わせは絶対に行わないでください。</b><br>
+            <span data-i18n="important_disclaimer">・セーブデータの破損について一切の責任を負いません。（<a href="https://x.com/Kr_x" target="_blank" data-i18n="bug_report_link">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します）</span></p>
         
-        <p>下記のセーブデータを読み込んでください。<br>
+        <p data-i18n="load_instruction">下記のセーブデータを読み込んでください。<br>
             <code>C:\Users\{user名}\AppData\LocalLow\PersonaeGames\Age of Reforging The Freelands\Save\{キャラクター名}\SaveData\{セーブデータ名}\sav.dat</code>
         </p>
 
-        <input type="file" id="fileInput" accept=".dat,.sav">
+        <input type="file" id="fileInput" accept=".dat">
+        <div data-i18n="drop_hint" style="font-size: 12px; color: #555; margin-top: 5px;"></div>
         
         <!-- NPC選択と編集エリア（最初は非表示） -->
         <div id="editor-area" class="hidden">
             <div>
-                <label for="npcSearch">NPCリストを絞り込み: <span style="font-weight: normal; font-size: 12px;">(一部英名でないとヒットしないNPCがいます)</span></label>
+                <label for="npcSearch" data-i18n="filter_npc_list_label">NPCリストを絞り込み: <span style="font-weight: normal; font-size: 12px;" data-i18n="filter_npc_list_note">(一部英名でないとヒットしないNPCがいます)</span></label>
                 <input type="text" id="npcSearch" placeholder="名前を入力...">
             </div>
             
@@ -156,18 +181,18 @@
             
             <!-- ▼▼▼ Traits編集UI ▼▼▼ -->
             <div id="traits-editor-container">
-                <label class="section-label">Traits</label>
+                <label class="section-label" data-i18n="traits_label">Traits</label>
                 <div id="traits-list"></div>
-                <button id="add-trait-button" type="button" style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">Traitを追加</button>
+                <button id="add-trait-button" type="button" style="margin-top: 5px; padding: 5px 10px; font-size: 12px;" data-i18n="add_trait_button">Traitを追加</button>
             </div>
 
             <!-- ▼▼▼ UMA編集UI（最初は非表示） ▼▼▼ -->
             <div id="uma-editor-container" class="hidden">
-                <label class="section-label">外見 (UMA DNA)</label>
+                <label class="section-label" data-i18n="appearance_label">外見 (UMA DNA)</label>
                 <div style="margin-bottom: 15px;">
-                    <button id="save-preset-button" type="button" style="padding: 5px 10px; font-size: 12px; background-color: #17a2b8;">外見をプリセットとして保存</button>
-                    <label class="button-like-label">
-                        プリセットから外見を読み込み
+                    <button id="save-preset-button" type="button" style="padding: 5px 10px; font-size: 12px; background-color: #17a2b8;" data-i18n="save_preset_button">外見をプリセットとして保存</button>
+                    <label class="button-like-label" data-i18n="load_preset_button_label">
+                        <span data-i18n="load_preset_button">プリセットから外見を読み込み</span>
                         <input type="file" id="load-preset-input" accept=".json" class="hidden">
                     </label>
                 </div>
@@ -176,19 +201,22 @@
                 </div>
             </div>
             <!-- UMAデータがない場合のメッセージ（uma-editor-containerの外に配置） -->
-            <p id="uma-unavailable-message" class="hidden">セーブデータに外見データがありません。ゲーム上に登場したNPCのみ外見の編集が可能です。</p>
+            <p id="uma-unavailable-message" class="hidden" data-i18n="uma_unavailable_message">セーブデータに外見データがありません。ゲーム上に登場したNPCのみ外見の編集が可能です。</p>
 
-            <label for="jsonEditor">JSONデータ (変更非推奨):
-                <button id="enableJsonEdit" type="button" style="margin-left: 10px; padding: 2px 8px; font-size: 12px;">編集を有効にする</button>
+            <label for="jsonEditor" data-i18n="json_editor_label">JSONデータ (変更非推奨):
+                <button id="enableJsonEdit" type="button" style="margin-left: 10px; padding: 2px 8px; font-size: 12px;" data-i18n="enable_json_edit_button">編集を有効にする</button>
             </label>
             <textarea id="jsonEditor" readonly></textarea>
 
             <div>
-                <button id="saveButton">編集内容をファイルに保存</button>
-                <button id="reloadButton">変更を破棄してリロード</button>
+                <button id="saveButton" data-i18n="save_button">編集内容をファイルに保存</button>
+                <button id="reloadButton" data-i18n="reload_button">変更を破棄してリロード</button>
             </div>
         </div>
     </div>
+
+    <!-- ドラッグ＆ドロップ用オーバーレイ（最初は非表示） -->
+    <div id="drag-overlay" class="hidden">Drop save data here</div>
 
     <script src="editor.js"></script>
 </body>

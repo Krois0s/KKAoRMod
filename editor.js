@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const savePresetButton = document.getElementById('save-preset-button');
     const loadPresetInput = document.getElementById('load-preset-input');
     const enableJsonEdit = document.getElementById('enableJsonEdit');
+    const dragOverlay = document.getElementById('drag-overlay');
+    const langJaButton = document.getElementById('lang-ja');
+    const langEnButton = document.getElementById('lang-en');
 
     // 読み込んだセーブデータ全体を保持
     let fullSaveData = null;
@@ -24,89 +27,254 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentNpcOriginalUmaDna = null; // 選択中のNPCの初期UMA DNAデータを保持
     let currentNpcIndex = null; // 現在選択/編集中のNPCのインデックス
     let isUpdatingFromJson = false; // JSONエディタからの更新中フラグ
+    let currentLang = 'ja'; // 現在の言語
+
+    // ★★★ 多言語対応リソース ★★★
+    const i18n = {
+        ja: {
+            // HTML内の静的テキスト
+            page_title: "Age of Reforging キャラクターエディタ",
+            title: "Age of Reforging キャラクターエディタ",
+            important_notes_title: "【重要】利用上の注意",
+            important_backup: "・編集前に必ずセーブデータのバックアップを取ってください。",
+            important_unknown_effects: "・各項目の変更がゲームに与える影響は未知数です。予期せぬ動作を引き起こす可能性があります。",
+            important_no_official_contact: "・このツールで編集したセーブデータに起因する不具合について、公式開発元へのお問い合わせは絶対に行わないでください。",
+            important_disclaimer: "・セーブデータの破損について一切の責任を負いません。（<a href=\"https://x.com/Kr_x\" target=\"_blank\" data-i18n=\"bug_report_link\">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します）",
+            bug_report_link: "不具合報告",
+            load_instruction: "下記のセーブデータを読み込んでください。<br><code>C:\\Users\\{user名}\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\{キャラクター名}\\SaveData\\{セーブデータ名}\\sav.dat</code>",
+            filter_npc_list_label: "NPCリストを絞り込み:",
+            filter_npc_list_note: "(一部英名でないとヒットしないNPCがいます)",
+            npc_select_label: "編集するNPCを選択:",
+            traits_label: "Traits",
+            add_trait_button: "Traitを追加",
+            appearance_label: "外見 (UMA DNA)",
+            save_preset_button: "外見をプリセットとして保存",
+            load_preset_button_label: "プリセットから外見を読み込み",
+            load_preset_button: "プリセットから外見を読み込み",
+            uma_unavailable_message: "セーブデータに外見データがありません。ゲーム上に登場したNPCのみ外見の編集が可能です。",
+            json_editor_label: "JSONデータ (変更非推奨):",
+            enable_json_edit_button: "編集を有効にする",
+            save_button: "編集内容をファイルに保存",
+            reload_button: "変更を破棄してリロード",
+            drop_hint: "（sav.datをドラッグ＆ドロップでも開けます）",
+            // 動的生成UI
+            group_profile: 'プロフィール',
+            group_attributes: '基礎能力値 (Attributes)',
+            group_talents: 'タレント (Talents)',
+            group_status: 'ステータス',
+            label_unitname: '名前',
+            label_gender: '性別',
+            label_race: '種族',
+            label_subRace: 'サブ種族',
+            label_unitVoice: 'ボイス',
+            label_voiceVolume: '音量',
+            label_voicePitch: 'ピッチ',
+            label_exp: '経験値',
+            label_potential: 'ポテンシャル',
+            label_BSstrength: '筋力',
+            label_BSendurance: '耐久力',
+            label_BSagility: '敏捷',
+            label_BSprecision: '感知',
+            label_BSintelligence: '知能',
+            label_BSwillpower: '意志',
+            label_BSPersuade: '説得',
+            label_BSBargain: '値段交渉',
+            label_BSIntimidate: '威圧',
+            label_BSScholarly: '学識',
+            label_BSPathfind: '路線を表示(探索)',
+            label_BSInsight: '洞察力',
+            label_BSMechanics: '機械学',
+            label_BSSneak: '隠密',
+            label_BSTheft: '窃盗',
+            label_BSSmithing: '鍛冶',
+            label_BSAlchemy: '錬金術',
+            label_BSCooking: '料理',
+            label_BSMedical: '医術',
+            label_BSTraining: '訓練',
+            label_BSTorture: '所長(拷問)',
+            label_health: '健康',
+            label_morale: '士気',
+            label_satiety: '満腹度',
+            label_vigor: '活力',
+            gender_male: '男性',
+            gender_female: '女性',
+            race_human: '人間',
+            race_elf: 'エルフ',
+            race_dwarf: 'ドワーフ',
+            race_bruteman: 'ブルートマン',
+            trait_placeholder: 'Trait ID',
+            trait_delete: '削除',
+            unknown_option: '不明',
+            // Trait名
+            trait_34: "しなやか", trait_37: "利発", trait_70: "美貌", trait_85: "熱心", trait_229:"せっかち",
+            trait_230: "辛抱強い", trait_247: "幸運", trait_249: "機会主義者", trait_250: "過度な慎重", trait_352: "鍛造習得",
+            // アラートメッセージ
+            alert_file_type_error: '対応しているファイルは .dat です。',
+            alert_file_read_error: 'ファイルの読み込みに失敗しました。',
+            alert_no_npcs_array: 'セーブデータ内に "npcs" 配列が見つかりませんでした。',
+            alert_json_parse_error: 'JSONファイルとして解析できませんでした。\n',
+            alert_reload_confirm: '現在の変更を破棄してリロードします。よろしいですか？',
+            alert_save_error: 'JSONの形式が正しくありません。保存できません。\n',
+            alert_preset_save_no_char: 'キャラクターが選択されていません。',
+            alert_preset_save_no_uma: '現在のキャラクターに外見データがありません。',
+            alert_preset_save_error: 'プリセットの保存中にエラーが発生しました。\n',
+        },
+        en: {
+            // HTML内の静的テキスト
+            page_title: "Age of Reforging Character Editor",
+            title: "Age of Reforging Character Editor",
+            important_notes_title: "Important Notes",
+            important_backup: "・Always back up your save data before editing.",
+            important_unknown_effects: "・The effects of changing each item on the game are unknown. It may cause unexpected behavior.",
+            important_no_official_contact: "・Do not contact the official developers about any issues caused by save data edited with this tool.",
+            important_disclaimer: "・We are not responsible for any save data corruption. (<a href=\"https://x.com/Kr_x\" target=\"_blank\" data-i18n=\"bug_report_link\">Bug reports</a> are welcome)",
+            bug_report_link: "Bug reports",
+            load_instruction: "Please load the following save data.<br><code>C:\\Users\\{username}\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\{character_name}\\SaveData\\{save_name}\\sav.dat</code>",
+            filter_npc_list_label: "Filter NPC List:",
+            filter_npc_list_note: "",
+            npc_select_label: "Select NPC to Edit:",
+            traits_label: "Traits",
+            add_trait_button: "Add Trait",
+            appearance_label: "Appearance (UMA DNA)",
+            save_preset_button: "Save Appearance as Preset",
+            load_preset_button_label: "Load Appearance from Preset",
+            load_preset_button: "Load from Preset",
+            uma_unavailable_message: "No appearance data in the save file. Only NPCs that have appeared in the game can have their appearance edited.",
+            json_editor_label: "JSON Data (Not Recommended to Edit):",
+            enable_json_edit_button: "Enable Editing",
+            save_button: "Save Changes to File",
+            reload_button: "Discard Changes and Reload",
+            drop_hint: "(You can also open by dragging and dropping sav.dat)",
+            // 動的生成UI
+            group_profile: 'Profile',
+            group_attributes: 'Attributes',
+            group_talents: 'Talents',
+            group_status: 'Status',
+            label_unitname: 'Name',
+            label_gender: 'Gender',
+            label_race: 'Race',
+            label_subRace: 'Sub-race',
+            label_unitVoice: 'Voice',
+            label_voiceVolume: 'Volume',
+            label_voicePitch: 'Pitch',
+            label_exp: 'Experience',
+            label_potential: 'Potential',
+            label_BSstrength: 'Strength',
+            label_BSendurance: 'Endurance',
+            label_BSagility: 'Agility',
+            label_BSprecision: 'Precision',
+            label_BSintelligence: 'Intelligence',
+            label_BSwillpower: 'Willpower',
+            label_BSPersuade: 'Persuade',
+            label_BSBargain: 'Bargain',
+            label_BSIntimidate: 'Intimidate',
+            label_BSScholarly: 'Scholarly',
+            label_BSPathfind: 'Pathfind',
+            label_BSInsight: 'Insight',
+            label_BSMechanics: 'Mechanics',
+            label_BSSneak: 'Sneak',
+            label_BSTheft: 'Theft',
+            label_BSSmithing: 'Smithing',
+            label_BSAlchemy: 'Alchemy',
+            label_BSCooking: 'Cooking',
+            label_BSMedical: 'Medical',
+            label_BSTraining: 'Training',
+            label_BSTorture: 'Torture',
+            label_health: 'Health',
+            label_morale: 'Morale',
+            label_satiety: 'Satiety',
+            label_vigor: 'Vigor',
+            gender_male: 'Male',
+            gender_female: 'Female',
+            race_human: 'Human',
+            race_elf: 'Elf',
+            race_dwarf: 'Dwarf',
+            race_bruteman: 'Bruteman',
+            trait_placeholder: 'Trait ID',
+            trait_delete: 'Delete',
+            unknown_option: 'Unknown',
+            // Trait名
+            trait_34: "Lithe", trait_37: "Intelligent", trait_70: "Beautiful", trait_85: "Diligent", trait_229:"Impatient",
+            trait_230: "Patient", trait_247: "Lucky", trait_249: "Opportunist", trait_250: "Overcautious", trait_352: "Learned Forging",
+            // アラートメッセージ
+            alert_file_type_error: 'Only .dat files are supported.',
+            alert_file_read_error: 'Failed to read the file.',
+            alert_no_npcs_array: 'Could not find "npcs" array in the save data.',
+            alert_json_parse_error: 'Could not parse as a JSON file.\n',
+            alert_reload_confirm: 'Discard current changes and reload?',
+            alert_save_error: 'Invalid JSON format. Cannot save.\n',
+            alert_preset_save_no_char: 'No character selected.',
+            alert_preset_save_no_uma: 'The current character has no appearance data.',
+            alert_preset_save_error: 'An error occurred while saving the preset.\n',
+        }
+    };
 
     // ★★★ 編集対象の項目をグループ化して定義 ★★★
     const editableGroups = [
         {
-            title: 'プロフィール',
+            titleKey: 'group_profile',
             fields: [
-                { key: 'unitname', label: '名前', type: 'text', readonly: true, inputWidth: '120px' },
+                { key: 'unitname', labelKey: 'label_unitname', type: 'text', readonly: true, inputWidth: '120px' },
                 { 
-                    key: 'gender', label: '性別', type: 'select', 
-                    options: [{ value: 1, text: '男性' }, { value: 2, text: '女性' }] 
+                    key: 'gender', labelKey: 'label_gender', type: 'select', 
+                    options: [{ value: 1, textKey: 'gender_male' }, { value: 2, textKey: 'gender_female' }] 
                 },
                 { 
-                    key: 'race', label: '種族', type: 'select',
+                    key: 'race', labelKey: 'label_race', type: 'select',
                     options: [
-                        { value: 1, text: '人間' }, { value: 2, text: 'エルフ' },
-                        { value: 3, text: 'ドワーフ' }, { value: 4, text: 'ブルートマン' }
+                        { value: 1, textKey: 'race_human' }, { value: 2, textKey: 'race_elf' },
+                        { value: 3, textKey: 'race_dwarf' }, { value: 4, textKey: 'race_bruteman' }
                     ]
                 },
-                { key: 'subRace', label: 'サブ種族', type: 'number' },
-                { key: 'unitVoice', label: 'ボイス', type: 'number' },
-                { key: 'voiceVolume', label: '音量', type: 'number', step: 0.1 },
-                { key: 'voicePitch', label: 'ピッチ', type: 'number', step: 0.01 },
-                { key: 'exp', label: '経験値', type: 'number' },
+                { key: 'subRace', labelKey: 'label_subRace', type: 'number' },
+                { key: 'unitVoice', labelKey: 'label_unitVoice', type: 'number' },
+                { key: 'voiceVolume', labelKey: 'label_voiceVolume', type: 'number', step: 0.1 },
+                { key: 'voicePitch', labelKey: 'label_voicePitch', type: 'number', step: 0.01 },
+                { key: 'exp', labelKey: 'label_exp', type: 'number' },
             ]
         },
         {
-            title: '基礎能力値 (Attributes)',
+            titleKey: 'group_attributes',
             fields: [
-                { key: 'potential', label: 'ポテンシャル', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSstrength', label: '筋力', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSendurance', label: '耐久', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSagility', label: '敏捷', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSprecision', label: '器用', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSintelligence', label: '知力', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSwillpower', label: '精神', type: 'number', path: ['humanAttribute'] },
+                { key: 'potential', labelKey: 'label_potential', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSstrength', labelKey: 'label_BSstrength', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSendurance', labelKey: 'label_BSendurance', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSagility', labelKey: 'label_BSagility', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSprecision', labelKey: 'label_BSprecision', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSintelligence', labelKey: 'label_BSintelligence', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSwillpower', labelKey: 'label_BSwillpower', type: 'number', path: ['humanAttribute'] },
             ]
         },
         {
-            title: 'タレント (Talents)',
+            titleKey: 'group_talents',
             fields: [
-                { key: 'BSPersuade', label: '説得', type: 'number', path: ['humanTalent'] },
-                { key: 'BSBargain', label: '交渉', type: 'number', path: ['humanTalent'] },
-                { key: 'BSIntimidate', label: '威圧', type: 'number', path: ['humanTalent'] },
-                { key: 'BSPathfind', label: '探索', type: 'number', path: ['humanTalent'] },
-                { key: 'BSInsight', label: '洞察', type: 'number', path: ['humanTalent'] },
-                { key: 'BSSneak', label: '隠密', type: 'number', path: ['humanTalent'] },
-                { key: 'BSMechanics', label: '機械', type: 'number', path: ['humanTalent'] },
-                { key: 'BSTheft', label: '盗み', type: 'number', path: ['humanTalent'] },
-                { key: 'BSScholarly', label: '学識', type: 'number', path: ['humanTalent'] },
-                { key: 'BSSmithing', label: '鍛冶', type: 'number', path: ['humanTalent'] },
-                { key: 'BSAlchemy', label: '錬金', type: 'number', path: ['humanTalent'] },
-                { key: 'BSCooking', label: '料理', type: 'number', path: ['humanTalent'] },
-                { key: 'BSMedical', label: '医療', type: 'number', path: ['humanTalent'] },
-                { key: 'BSTraining', label: '訓練', type: 'number', path: ['humanTalent'] },
-                { key: 'BSTorture', label: '拷問', type: 'number', path: ['humanTalent'] },
+                { key: 'BSPersuade', labelKey: 'label_BSPersuade', type: 'number', path: ['humanTalent'] },
+                { key: 'BSBargain', labelKey: 'label_BSBargain', type: 'number', path: ['humanTalent'] },
+                { key: 'BSIntimidate', labelKey: 'label_BSIntimidate', type: 'number', path: ['humanTalent'] },
+                { key: 'BSScholarly', labelKey: 'label_BSScholarly', type: 'number', path: ['humanTalent'] },
+                { key: 'BSPathfind', labelKey: 'label_BSPathfind', type: 'number', path: ['humanTalent'] },
+                { key: 'BSInsight', labelKey: 'label_BSInsight', type: 'number', path: ['humanTalent'] },
+                { key: 'BSMechanics', labelKey: 'label_BSMechanics', type: 'number', path: ['humanTalent'] },
+                { key: 'BSSneak', labelKey: 'label_BSSneak', type: 'number', path: ['humanTalent'] },
+                { key: 'BSTheft', labelKey: 'label_BSTheft', type: 'number', path: ['humanTalent'] },
+                { key: 'BSSmithing', labelKey: 'label_BSSmithing', type: 'number', path: ['humanTalent'] },
+                { key: 'BSAlchemy', labelKey: 'label_BSAlchemy', type: 'number', path: ['humanTalent'] },
+                { key: 'BSCooking', labelKey: 'label_BSCooking', type: 'number', path: ['humanTalent'] },
+                { key: 'BSMedical', labelKey: 'label_BSMedical', type: 'number', path: ['humanTalent'] },
+                { key: 'BSTraining', labelKey: 'label_BSTraining', type: 'number', path: ['humanTalent'] },
+                { key: 'BSTorture', labelKey: 'label_BSTorture', type: 'number', path: ['humanTalent'] },
             ]
         },
         {
-            title: 'ステータス',
+            titleKey: 'group_status',
             fields: [
-                { key: 'health', label: '体力', type: 'number' },
-                { key: 'morale', label: '士気', type: 'number' },
-                { key: 'vigor', label: '活力', type: 'number' },
-                { key: 'satiety', label: '満腹度', type: 'number' },
+                { key: 'health', labelKey: 'label_health', type: 'number' },
+                { key: 'morale', labelKey: 'label_morale', type: 'number' },
+                { key: 'satiety', labelKey: 'label_satiety', type: 'number' },
+                { key: 'vigor', labelKey: 'label_vigor', type: 'number' },
             ]
         }
     ];
-
-    // ★★★ Trait IDと名称の対応表 ★★★
-    const traitIdToName = {
-        34: "しなやか",
-        37: "利発",
-        70: "美貌",
-        85: "熱心",
-        229:"せっかち",
-        230: "辛抱強い",
-        247: "幸運",
-        249: "機会主義者",
-        250: "過度な慎重",
-
-        352: "鍛造習得"
-        // 今後判明したIDと名称をここに追加していく
-    };
 
     // ===== 最初に個別フォームを生成 =====
     function createIndividualForm() {
@@ -117,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const groupTitle = document.createElement('div');
             groupTitle.className = 'form-group-title';
-            groupTitle.textContent = group.title;
+            groupTitle.textContent = i18n[currentLang][group.titleKey] || group.titleKey;
             groupContainer.appendChild(groupTitle);
 
             const gridContainer = document.createElement('div');
@@ -127,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const div = document.createElement('div');
                 const label = document.createElement('label');
                 label.htmlFor = `input-${field.key}`;
-                label.textContent = field.label;
+                label.textContent = i18n[currentLang][field.labelKey] || field.labelKey;
                 
                 let inputElement;
 
@@ -138,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         field.options.forEach(opt => {
                             const option = document.createElement('option');
                             option.value = opt.value;
-                            option.textContent = opt.text;
+                            option.textContent = i18n[currentLang][opt.textKey] || opt.textKey;
                             inputElement.appendChild(option);
                         });
                     }
@@ -166,7 +334,41 @@ document.addEventListener('DOMContentLoaded', () => {
             individualForm.appendChild(groupContainer);
         });
     }
-    createIndividualForm();
+
+    // ===== 言語切り替え関連 =====
+    function setLanguage(lang) {
+        currentLang = i18n[lang] ? lang : 'en'; // 対応言語がなければ英語にフォールバック
+        document.title = i18n[currentLang].page_title; // ページのタイトルを更新
+
+        // 静的テキストの更新
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18n[currentLang][key]) {
+                // HTMLタグを含むキーはinnerHTML、それ以外はtextContentで更新
+                if (key === 'important_disclaimer' || key === 'load_instruction') {
+                    el.innerHTML = i18n[currentLang][key];
+                } else {
+                    el.textContent = i18n[currentLang][key];
+                }
+            }
+        });
+        document.querySelector('label[for="npcSelector"]').textContent = i18n[currentLang].npc_select_label;
+        document.getElementById('npcSearch').placeholder = i18n[currentLang].label_unitname;
+
+        // 動的フォームの再生成
+        createIndividualForm();
+
+        // 既にデータが読み込まれていれば、フォームに値を再設定
+        if (fullSaveData && currentNpcIndex !== null) {
+            displayNpcData(currentNpcIndex);
+        }
+    }
+
+    langJaButton.addEventListener('click', () => setLanguage('ja'));
+    langEnButton.addEventListener('click', () => setLanguage('en'));
+
+    // 初期言語を設定 (ブラウザの言語が日本語なら日本語、それ以外は英語)
+    setLanguage(navigator.language.startsWith('ja') ? 'ja' : 'en');
 
 
     // ===== ファイル選択時の処理 =====
@@ -176,30 +378,66 @@ document.addEventListener('DOMContentLoaded', () => {
         event.target.value = null;
     });
 
-    fileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
+    fileInput.addEventListener('change', (event) => handleFile(event.target.files[0]));
+
+    // ===== ドラッグ＆ドロップ処理 =====
+    window.addEventListener('dragover', (event) => {
+        event.preventDefault(); // デフォルトの挙動（ファイルを開くなど）を防ぐ
+        dragOverlay.classList.remove('hidden');
+    });
+
+    window.addEventListener('dragleave', (event) => {
+        event.preventDefault();
+        // event.relatedTargetがnullの場合、ウィンドウの外に出たと判断できる
+        if (!event.relatedTarget) {
+           dragOverlay.classList.add('hidden');
+        }
+    });
+
+    // ドラッグ操作がキャンセルされた場合など、終了時にも確実に非表示にする
+    window.addEventListener('dragend', (event) => {
+        event.preventDefault();
+        dragOverlay.classList.add('hidden');
+    });
+
+    window.addEventListener('drop', (event) => {
+        event.preventDefault(); // デフォルトの挙動を防ぐ
+        dragOverlay.classList.add('hidden');
+
+        if (event.dataTransfer.files.length > 0) {
+            handleFile(event.dataTransfer.files[0]);
+        }
+    });
+
+    // ===== ファイル処理の共通関数 =====
+    function handleFile(file) {
         if (!file) return;
-        
+
+        // 拡張子チェック
+        if (!file.name.endsWith('.dat')) {
+            alert(i18n[currentLang].alert_file_type_error);
+            return;
+        }
+
         // 読み込み前に、現在選択中のNPCの情報を保持しておく
         const currentNpcInfo = (fullSaveData && currentNpcIndex !== null) ? {
             unitId: fullSaveData.npcs[currentNpcIndex].unitId,
             unitname: fullSaveData.npcs[currentNpcIndex].unitname
         } : null;
 
-        // ファイル読み込み処理の開始時に、現在の選択とメモリ上のデータをリセットする
-        currentNpcIndex = null;
-        fullSaveData = null; 
-
         originalFileName = file.name;
         const reader = new FileReader();
 
         reader.onload = (e) => {
+            // 読み込み成功時に初めてデータをリセット
+            currentNpcIndex = null;
+            fullSaveData = null;
             // 保持したNPC情報をヒントとして渡す
             loadAndDisplayData(e.target.result, currentNpcInfo);
         };
-        reader.onerror = () => alert('ファイルの読み込みに失敗しました。');
+        reader.onerror = () => alert(i18n[currentLang].alert_file_read_error);
         reader.readAsText(file);
-    });
+    }
 
     // ===== NPC選択プルダウンの生成処理 =====
     function populateNpcSelector(npcs, selectedIndex = 0) {
@@ -283,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!optionExists && value !== null && value !== '') {
                         const newOption = document.createElement('option');
                         newOption.value = value;
-                        newOption.textContent = `不明 (${value})`;
+                    newOption.textContent = `${i18n[currentLang].unknown_option} (${value})`;
                         inputElement.appendChild(newOption);
                     }
                 }
@@ -319,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.type = 'number';
         input.value = value;
         input.style.flexGrow = '1';
-        input.placeholder = 'Trait ID';
+        input.placeholder = i18n[currentLang].trait_placeholder;
         if (input.value === '') {
             input.classList.add('input-null-warning');
         } else {
@@ -332,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nameLabel.style.whiteSpace = 'nowrap'; // 名前が改行されないように
 
         const updateNameLabel = (id) => {
-            const traitName = traitIdToName[id];
+            const traitName = i18n[currentLang][`trait_${id}`];
             nameLabel.textContent = traitName || '';
         };
 
@@ -342,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const removeBtn = document.createElement('button');
-        removeBtn.textContent = '削除';
+        removeBtn.textContent = i18n[currentLang].trait_delete;
         removeBtn.type = 'button';
         removeBtn.className = 'btn-delete'; // 専用スタイルを適用
         removeBtn.onclick = () => {
@@ -518,11 +756,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 editorArea.classList.remove('hidden');
                 filterNpcList(); // NPCリスト生成後にフィルタリングを再実行
             } else {
-                alert('セーブデータ内に "npcs" 配列が見つかりませんでした。');
+                alert(i18n[currentLang].alert_no_npcs_array);
                 resetEditor();
             }
         } catch (error) {
-            alert('JSONファイルとして解析できませんでした。\n' + error);
+            alert(i18n[currentLang].alert_json_parse_error + error);
             resetEditor();
         }
     }
@@ -729,7 +967,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // リロードボタンのイベントリスナー
     if (reloadButton) {
         reloadButton.addEventListener('click', () => {
-            if (confirm('現在の変更を破棄してリロードします。よろしいですか？')) {
+            if (confirm(i18n[currentLang].alert_reload_confirm)) {
                 const currentIndex = currentNpcIndex; // 現在選択中のインデックスを保持
                 const fileInput = document.getElementById('fileInput');
                 const file = fileInput.files[0];
@@ -773,14 +1011,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         } catch (error) {
-            alert('JSONの形式が正しくありません。保存できません。\n' + error);
+            alert(i18n[currentLang].alert_save_error + error);
         }
     });
 
     // ===== 外見プリセットの保存処理 =====
     savePresetButton.addEventListener('click', () => {
         if (!currentNpcOriginalData) {
-            alert('キャラクターが選択されていません。');
+            alert(i18n[currentLang].alert_preset_save_no_char);
             return;
         }
 
@@ -789,7 +1027,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const umaRecipeString = currentNpcData.umaRecipe;
 
             if (!umaRecipeString) {
-                alert('現在のキャラクターに外見データがありません。');
+                alert(i18n[currentLang].alert_preset_save_no_uma);
                 return;
             }
 
@@ -804,7 +1042,7 @@ document.addEventListener('DOMContentLoaded', () => {
             URL.revokeObjectURL(url);
 
         } catch (e) {
-            alert('プリセットの保存中にエラーが発生しました。\n' + e);
+            alert(i18n[currentLang].alert_preset_save_error + e);
         }
     });
 
