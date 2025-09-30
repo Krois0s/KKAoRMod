@@ -25,60 +25,71 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentNpcIndex = null; // 現在選択/編集中のNPCのインデックス
     let isUpdatingFromJson = false; // JSONエディタからの更新中フラグ
 
-    // ★★★ 編集対象の項目リストを定義 ★★★
-    const editableFields = [
-        { key: 'unitname', label: '名前', type: 'text', readonly: true },
-        { key: 'exp', label: '経験値', type: 'number' },
-        { 
-            key: 'gender', 
-            label: '性別', 
-            type: 'select', 
-            options: [
-                { value: 1, text: '男性' },
-                { value: 2, text: '女性' }
-            ] 
-        },
-        { 
-            key: 'race', 
-            label: '種族', 
-            type: 'select',
-            options: [
-                { value: 1, text: '人間' },
-                { value: 2, text: 'エルフ' },
-                { value: 3, text: 'ドワーフ' },
-                { value: 4, text: 'ブルートマン' }
+    // ★★★ 編集対象の項目をグループ化して定義 ★★★
+    const editableGroups = [
+        {
+            title: 'プロフィール',
+            fields: [
+                { key: 'unitname', label: '名前', type: 'text', readonly: true, inputWidth: '120px' },
+                { 
+                    key: 'gender', label: '性別', type: 'select', 
+                    options: [{ value: 1, text: '男性' }, { value: 2, text: '女性' }] 
+                },
+                { 
+                    key: 'race', label: '種族', type: 'select',
+                    options: [
+                        { value: 1, text: '人間' }, { value: 2, text: 'エルフ' },
+                        { value: 3, text: 'ドワーフ' }, { value: 4, text: 'ブルートマン' }
+                    ]
+                },
+                { key: 'subRace', label: 'サブ種族', type: 'number' },
+                { key: 'unitVoice', label: 'ボイス', type: 'number' },
+                { key: 'voiceVolume', label: '音量', type: 'number', step: 0.1 },
+                { key: 'voicePitch', label: 'ピッチ', type: 'number', step: 0.01 },
+                { key: 'exp', label: '経験値', type: 'number' },
             ]
         },
-        { key: 'subRace', label: 'サブ種族', type: 'number' },
-        { key: 'potential', label: 'ポテンシャル', type: 'number', path: ['humanAttribute'] },
-        { key: 'BSstrength', label: '筋力', type: 'number', path: ['humanAttribute'] },
-        { key: 'BSendurance', label: '耐久', type: 'number', path: ['humanAttribute'] },
-        { key: 'BSagility', label: '敏捷', type: 'number', path: ['humanAttribute'] },
-        { key: 'BSprecision', label: '器用', type: 'number', path: ['humanAttribute'] },
-        { key: 'BSintelligence', label: '知力', type: 'number', path: ['humanAttribute'] },
-        { key: 'BSwillpower', label: '精神', type: 'number', path: ['humanAttribute'] },
-        { key: 'BSPersuade', label: '説得', type: 'number', path: ['humanTalent'] },
-        { key: 'BSBargain', label: '交渉', type: 'number', path: ['humanTalent'] },
-        { key: 'BSIntimidate', label: '威圧', type: 'number', path: ['humanTalent'] },
-        { key: 'BSPathfind', label: '探索', type: 'number', path: ['humanTalent'] },
-        { key: 'BSInsight', label: '洞察', type: 'number', path: ['humanTalent'] },
-        { key: 'BSSneak', label: '隠密', type: 'number', path: ['humanTalent'] },
-        { key: 'BSMechanics', label: '機械', type: 'number', path: ['humanTalent'] },
-        { key: 'BSTheft', label: '盗み', type: 'number', path: ['humanTalent'] },
-        { key: 'BSScholarly', label: '学識', type: 'number', path: ['humanTalent'] },
-        { key: 'BSSmithing', label: '鍛冶', type: 'number', path: ['humanTalent'] },
-        { key: 'BSAlchemy', label: '錬金', type: 'number', path: ['humanTalent'] },
-        { key: 'BSCooking', label: '料理', type: 'number', path: ['humanTalent'] },
-        { key: 'BSMedical', label: '医療', type: 'number', path: ['humanTalent'] },
-        { key: 'BSTraining', label: '訓練', type: 'number', path: ['humanTalent'] },
-        { key: 'BSTorture', label: '拷問', type: 'number', path: ['humanTalent'] },
-        { key: 'unitVoice', label: 'ボイス', type: 'number' },
-        { key: 'voiceVolume', label: '音量', type: 'number', step: 0.1 },
-        { key: 'voicePitch', label: 'ピッチ', type: 'number', step: 0.01 },
-        { key: 'health', label: '体力', type: 'number' },
-        { key: 'morale', label: '士気', type: 'number' },
-        { key: 'vigor', label: '活力', type: 'number' },
-        { key: 'satiety', label: '満腹度', type: 'number' }
+        {
+            title: '基礎能力値 (Attributes)',
+            fields: [
+                { key: 'potential', label: 'ポテンシャル', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSstrength', label: '筋力', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSendurance', label: '耐久', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSagility', label: '敏捷', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSprecision', label: '器用', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSintelligence', label: '知力', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSwillpower', label: '精神', type: 'number', path: ['humanAttribute'] },
+            ]
+        },
+        {
+            title: 'タレント (Talents)',
+            fields: [
+                { key: 'BSPersuade', label: '説得', type: 'number', path: ['humanTalent'] },
+                { key: 'BSBargain', label: '交渉', type: 'number', path: ['humanTalent'] },
+                { key: 'BSIntimidate', label: '威圧', type: 'number', path: ['humanTalent'] },
+                { key: 'BSPathfind', label: '探索', type: 'number', path: ['humanTalent'] },
+                { key: 'BSInsight', label: '洞察', type: 'number', path: ['humanTalent'] },
+                { key: 'BSSneak', label: '隠密', type: 'number', path: ['humanTalent'] },
+                { key: 'BSMechanics', label: '機械', type: 'number', path: ['humanTalent'] },
+                { key: 'BSTheft', label: '盗み', type: 'number', path: ['humanTalent'] },
+                { key: 'BSScholarly', label: '学識', type: 'number', path: ['humanTalent'] },
+                { key: 'BSSmithing', label: '鍛冶', type: 'number', path: ['humanTalent'] },
+                { key: 'BSAlchemy', label: '錬金', type: 'number', path: ['humanTalent'] },
+                { key: 'BSCooking', label: '料理', type: 'number', path: ['humanTalent'] },
+                { key: 'BSMedical', label: '医療', type: 'number', path: ['humanTalent'] },
+                { key: 'BSTraining', label: '訓練', type: 'number', path: ['humanTalent'] },
+                { key: 'BSTorture', label: '拷問', type: 'number', path: ['humanTalent'] },
+            ]
+        },
+        {
+            title: 'ステータス',
+            fields: [
+                { key: 'health', label: '体力', type: 'number' },
+                { key: 'morale', label: '士気', type: 'number' },
+                { key: 'vigor', label: '活力', type: 'number' },
+                { key: 'satiety', label: '満腹度', type: 'number' },
+            ]
+        }
     ];
 
     // ★★★ Trait IDと名称の対応表 ★★★
@@ -100,40 +111,59 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== 最初に個別フォームを生成 =====
     function createIndividualForm() {
         individualForm.innerHTML = '';
-        editableFields.forEach(field => {
-            const div = document.createElement('div');
-            const label = document.createElement('label');
-            label.htmlFor = `input-${field.key}`;
-            label.textContent = field.label;
-            
-            let inputElement;
+        editableGroups.forEach(group => {
+            const groupContainer = document.createElement('div');
+            groupContainer.className = 'form-group';
 
-            if (field.type === 'select') {
-                inputElement = document.createElement('select');
-                inputElement.id = `input-${field.key}`;
-                if (field.options) {
-                    field.options.forEach(opt => {
-                        const option = document.createElement('option');
-                        option.value = opt.value;
-                        option.textContent = opt.text;
-                        inputElement.appendChild(option);
-                    });
-                }
-            } else { // 'text', 'number'
-                inputElement = document.createElement('input');
-                inputElement.type = field.type;
-                inputElement.id = `input-${field.key}`;
-                if (field.step) inputElement.step = field.step;
-                if (field.readonly) {
-                    inputElement.readOnly = true;
-                    inputElement.style.backgroundColor = '#e9ecef';
-                }
-            }
-            if (!field.readonly) inputElement.addEventListener('input', updateJsonEditorFromInputs);
+            const groupTitle = document.createElement('div');
+            groupTitle.className = 'form-group-title';
+            groupTitle.textContent = group.title;
+            groupContainer.appendChild(groupTitle);
 
-            div.appendChild(label);
-            div.appendChild(inputElement);
-            individualForm.appendChild(div);
+            const gridContainer = document.createElement('div');
+            gridContainer.className = 'form-group-grid';
+
+            group.fields.forEach(field => {
+                const div = document.createElement('div');
+                const label = document.createElement('label');
+                label.htmlFor = `input-${field.key}`;
+                label.textContent = field.label;
+                
+                let inputElement;
+
+                if (field.type === 'select') {
+                    inputElement = document.createElement('select');
+                    inputElement.id = `input-${field.key}`;
+                    if (field.options) {
+                        field.options.forEach(opt => {
+                            const option = document.createElement('option');
+                            option.value = opt.value;
+                            option.textContent = opt.text;
+                            inputElement.appendChild(option);
+                        });
+                    }
+                } else { // 'text', 'number'
+                    inputElement = document.createElement('input');
+                    inputElement.type = field.type;
+                    inputElement.id = `input-${field.key}`;
+                    if (field.step) inputElement.step = field.step;
+                    if (field.readonly) {
+                        inputElement.readOnly = true;
+                        inputElement.style.backgroundColor = '#e9ecef';
+                    }
+                }
+                // 個別の幅が指定されていれば適用
+                if (field.inputWidth) {
+                    inputElement.style.width = field.inputWidth;
+                }      
+                if (!field.readonly) inputElement.addEventListener('input', updateJsonEditorFromInputs);
+
+                div.appendChild(label);
+                div.appendChild(inputElement);
+                gridContainer.appendChild(div);
+            });
+            groupContainer.appendChild(gridContainer);
+            individualForm.appendChild(groupContainer);
         });
     }
     createIndividualForm();
@@ -233,36 +263,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===== JSONオブジェクトから個別UIに値をセットする関数 =====
     function updateIndividualInputs(npcData) {
-        editableFields.forEach(field => {
-            const inputElement = document.getElementById(`input-${field.key}`);
-            if (!inputElement) return;
+        editableGroups.forEach(group => {
+            group.fields.forEach(field => {
+                const inputElement = document.getElementById(`input-${field.key}`);
+                if (!inputElement) return;
 
-            let valueSource = npcData;
-            // pathが指定されていれば、その階層を掘り進む
-            if (field.path) {
-                valueSource = field.path.reduce((obj, key) => (obj || {})[key], npcData);
-            }
-
-            const value = valueSource ? valueSource[field.key] : '';
-
-            if (field.type === 'select') {
-                // 既存の選択肢に値があるか確認
-                const optionExists = Array.from(inputElement.options).some(opt => opt.value == value);
-                // 既存の選択肢にない場合、新しい選択肢を動的に追加
-                if (!optionExists && value !== null && value !== '') {
-                    const newOption = document.createElement('option');
-                    newOption.value = value;
-                    newOption.textContent = `不明 (${value})`;
-                    inputElement.appendChild(newOption);
+                let valueSource = npcData;
+                // pathが指定されていれば、その階層を掘り進む
+                if (field.path) {
+                    valueSource = field.path.reduce((obj, key) => (obj || {})[key], npcData);
                 }
-            }
 
-            inputElement.value = (value !== null && value !== undefined) ? value : '';
-            if (value === '' || value === null) {
-                inputElement.classList.add('input-null-warning');
-            } else {
-                inputElement.classList.remove('input-null-warning');
-            }
+                const value = valueSource ? valueSource[field.key] : '';
+
+                if (field.type === 'select') {
+                    // 既存の選択肢に値があるか確認
+                    const optionExists = Array.from(inputElement.options).some(opt => opt.value == value);
+                    // 既存の選択肢にない場合、新しい選択肢を動的に追加
+                    if (!optionExists && value !== null && value !== '') {
+                        const newOption = document.createElement('option');
+                        newOption.value = value;
+                        newOption.textContent = `不明 (${value})`;
+                        inputElement.appendChild(newOption);
+                    }
+                }
+
+                inputElement.value = (value !== null && value !== undefined) ? value : '';
+                if (value === '' || value === null) {
+                    inputElement.classList.add('input-null-warning');
+                } else {
+                    inputElement.classList.remove('input-null-warning');
+                }
+            });
         });
     }
 
@@ -605,58 +637,60 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const currentNpcData = JSON.parse(jsonEditor.value);
             
-            editableFields.forEach(field => {
-                const inputElement = document.getElementById(`input-${field.key}`);
-                if (!inputElement) return;
+            editableGroups.forEach(group => {
+                group.fields.forEach(field => {
+                    const inputElement = document.getElementById(`input-${field.key}`);
+                    if (!inputElement) return;
 
-                let value = inputElement.value;
+                    let value = inputElement.value;
 
-                // 警告スタイルの制御
-                if (value === '') {
-                    inputElement.classList.add('input-null-warning');
-                } else {
-                    inputElement.classList.remove('input-null-warning');
-                }
-
-                // 値の型変換
-                if (value === '' || value === null) {
-                    value = null; // 空文字はnullとして扱う
-                } else if (field.type === 'number' || field.type === 'select') {
-                    // selectも数値として扱う
-                    const num = parseFloat(value);
-                    value = isNaN(num) ? null : num;
-                }
-
-                let targetObject = currentNpcData;
-                if (field.path) {
-                    targetObject = field.path.reduce((obj, key) => {
-                        if (!obj[key]) obj[key] = {}; // 途中のオブジェクトがなければ作成
-                        return obj[key];
-                    }, currentNpcData);
-                }
-                
-                targetObject[field.key] = value;
-
-                // ★★★ 基礎ステータス変更時に、補正後ステータスにも差分を反映 ★★★
-                if (field.key.startsWith('BS')) {
-                    const baseKey = field.key; // 例: "BSstrength"
-                    const finalKey = baseKey.substring(2); // 例: "strength"
-                    const finalKeyLower = finalKey.toLowerCase(); // 補正後キーは小文字の場合がある
-
-                    // 基礎値の元の値を取得する場所を特定
-                    const originalBaseSource = field.path && field.path.includes('humanTalent') 
-                        ? currentNpcOriginalData.humanTalent 
-                        : currentNpcOriginalData.humanAttribute;
-
-                    // 差分を計算
-                    const originalValue = (originalBaseSource || {})[baseKey] || 0;
-                    const diff = value - originalValue;
-
-                    // 補正後ステータスに差分を加算
-                    if (currentNpcData.hasOwnProperty(finalKeyLower)) {
-                        currentNpcData[finalKeyLower] = (currentNpcOriginalData[finalKeyLower] || 0) + diff;
+                    // 警告スタイルの制御
+                    if (value === '') {
+                        inputElement.classList.add('input-null-warning');
+                    } else {
+                        inputElement.classList.remove('input-null-warning');
                     }
-                }
+
+                    // 値の型変換
+                    if (value === '' || value === null) {
+                        value = null; // 空文字はnullとして扱う
+                    } else if (field.type === 'number' || field.type === 'select') {
+                        // selectも数値として扱う
+                        const num = parseFloat(value);
+                        value = isNaN(num) ? null : num;
+                    }
+
+                    let targetObject = currentNpcData;
+                    if (field.path) {
+                        targetObject = field.path.reduce((obj, key) => {
+                            if (!obj[key]) obj[key] = {}; // 途中のオブジェクトがなければ作成
+                            return obj[key];
+                        }, currentNpcData);
+                    }
+                    
+                    targetObject[field.key] = value;
+
+                    // ★★★ 基礎ステータス変更時に、補正後ステータスにも差分を反映 ★★★
+                    if (field.key.startsWith('BS')) {
+                        const baseKey = field.key; // 例: "BSstrength"
+                        const finalKey = baseKey.substring(2); // 例: "strength"
+                        const finalKeyLower = finalKey.toLowerCase(); // 補正後キーは小文字の場合がある
+
+                        // 基礎値の元の値を取得する場所を特定
+                        const originalBaseSource = field.path && field.path.includes('humanTalent') 
+                            ? currentNpcOriginalData.humanTalent 
+                            : currentNpcOriginalData.humanAttribute;
+
+                        // 差分を計算
+                        const originalValue = (originalBaseSource || {})[baseKey] || 0;
+                        const diff = value - originalValue;
+
+                        // 補正後ステータスに差分を加算
+                        if (currentNpcData.hasOwnProperty(finalKeyLower)) {
+                            currentNpcData[finalKeyLower] = (currentNpcOriginalData[finalKeyLower] || 0) + diff;
+                        }
+                    }
+                });
             });
 
             // Traitsの値を収集して更新
@@ -695,15 +729,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // リロードボタンのイベントリスナー
     if (reloadButton) {
         reloadButton.addEventListener('click', () => {
-            const currentIndex = currentNpcIndex; // 現在選択中のインデックスを保持
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    loadAndDisplayData(e.target.result, currentIndex); // 保持したインデックスを渡す
-                };
-                reader.readAsText(file);
+            if (confirm('現在の変更を破棄してリロードします。よろしいですか？')) {
+                const currentIndex = currentNpcIndex; // 現在選択中のインデックスを保持
+                const fileInput = document.getElementById('fileInput');
+                const file = fileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        loadAndDisplayData(e.target.result, currentIndex); // 保持したインデックスを渡す
+                    };
+                    reader.readAsText(file);
+                }
             }
         });
     }
@@ -740,47 +776,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('JSONの形式が正しくありません。保存できません。\n' + error);
         }
     });
-
-    function loadAndDisplayData(jsonString, selectionHint = null) {
-        try {
-            fullSaveData = JSON.parse(jsonString);
-            if (fullSaveData && Array.isArray(fullSaveData.npcs)) {
-                let targetIndex = 0;
-                // selectionHintがオブジェクト（unitIdとunitnameを持つ）の場合
-                if (selectionHint && typeof selectionHint === 'object' && selectionHint.unitId && selectionHint.unitname) {
-                    const foundIndex = fullSaveData.npcs.findIndex(npc => 
-                        npc.unitId === selectionHint.unitId && npc.unitname === selectionHint.unitname
-                    );
-                    if (foundIndex !== -1) {
-                        targetIndex = foundIndex;
-                    }
-                // selectionHintが数値（インデックス）の場合 (リロード時)
-                } else if (typeof selectionHint === 'number') {
-                    targetIndex = selectionHint;
-                }
-
-                populateNpcSelector(fullSaveData.npcs, targetIndex);
-                editorArea.classList.remove('hidden');
-                filterNpcList(); // NPCリスト生成後にフィルタリングを再実行
-            } else {
-                alert('セーブデータ内に "npcs" 配列が見つかりませんでした。');
-                resetEditor();
-            }
-        } catch (error) {
-            alert('JSONファイルとして解析できませんでした。\n' + error);
-            resetEditor();
-        }
-    }
-
-
-
-
-    // ===== エディタを初期状態に戻す処理 =====
-    function resetEditor() {
-        fullSaveData = null;
-        editorArea.classList.add('hidden');
-        fileInput.value = '';
-    }
 
     // ===== 外見プリセットの保存処理 =====
     savePresetButton.addEventListener('click', () => {

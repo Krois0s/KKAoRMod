@@ -26,14 +26,31 @@
 
         /* 個別編集フォームのレイアウト */
         #individual-editor-form {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
             padding: 20px;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             margin-top: 15px;
             background-color: #fafafa;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        .form-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .form-group-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .form-group-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* 横幅を少し広げてラベルと入力欄を収める */
+            gap: 15px;
         }
         /* Traits編集フォームのレイアウト */
         #traits-editor-container {
@@ -56,7 +73,15 @@
             background-color: #fffbe6; /* 薄い黄色 */
             border-color: #fadb14;
         }
-        #individual-editor-form div { display: flex; flex-direction: column; }
+        .form-group-grid > div {
+            display: flex;
+            align-items: center; /* ラベルと入力欄を中央揃え */
+            justify-content: space-between; /* ラベルと入力欄を両端に配置 */
+        }
+        .form-group-grid > div > input,
+        .form-group-grid > div > select {
+            width: 80px; /* 入力欄の幅を固定 */
+        }
 
         /* Trait削除ボタン用のコンパクトなスタイル */
         .btn-delete {
