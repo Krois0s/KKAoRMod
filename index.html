@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Age of Reforging キャラクターエディタ</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; max-width: 960px; margin: 0 auto; background-color: #f4f4f4; }
+        h1 { text-align: center; }
+        .container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        textarea { width: 100%; height: 500px; margin-top: 10px; box-sizing: border-box; font-family: monospace; font-size: 14px; }
+        textarea[readonly] {
+            background-color: #e9ecef; /* 非活性時の背景色 */
+            cursor: default;
+        }
+        button { margin-top: 10px; margin-right: 10px; padding: 10px 15px; cursor: pointer; border: none; border-radius: 4px; background-color: #007bff; color: white; }
+        button:hover { background-color: #0056b3; }
+        select, input[type="text"], input[type="number"] { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        label { display: block; margin-top: 12px; font-weight: bold; font-size: 14px; }
+        .hidden { display: none; }
+        
+        /* セクションのメインラベル用のスタイル */
+        .section-label {
+            font-size: 1.17em; /* h3タグとほぼ同じサイズ */
+            margin-bottom: 10px;
+        }
+
+        /* 個別編集フォームのレイアウト */
+        #individual-editor-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-top: 15px;
+            background-color: #fafafa;
+        }
+        /* Traits編集フォームのレイアウト */
+        #traits-editor-container {
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-top: 15px;
+            background-color: #fafafa;
+        }
+        /* UMA編集フォームのレイアウト */
+        #uma-editor-container {
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-top: 15px;
+            background-color: #fafafa;
+        }
+        /* 値がnullの場合の警告スタイル */
+        .input-null-warning {
+            background-color: #fffbe6; /* 薄い黄色 */
+            border-color: #fadb14;
+        }
+        #individual-editor-form div { display: flex; flex-direction: column; }
+
+        /* Trait削除ボタン用のコンパクトなスタイル */
+        .btn-delete {
+            padding: 4px 8px;
+            font-size: 12px;
+            margin: 0 0 0 10px; /* 上下のマージンをなくし、左のマージンだけにする */
+            background-color: #dc3545; /* 削除を示す赤色 */
+            flex-shrink: 0; /* ボタンが縮まないようにする */
+        }
+        .btn-delete:hover { background-color: #c82333; }
+
+        /* ファイル入力をボタンのように見せるためのスタイル */
+        .button-like-label {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            background-color: #28a745; /* 読み込みを示す緑色 */
+            color: white;
+            font-weight: normal;
+        }
+        .button-like-label:hover { background-color: #218838; }
+
+        /* アコーディオンUIのスタイル */
+        details > summary {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        details > summary > h3 {
+            display: inline-block; /* h3の余白をなくす */
+            margin: 0; /* h3のデフォルトマージンをリセット */
+        }
+        /* 閉じているdetailsタグのスタイル調整 */
+        details:not([open]) {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+        details:not([open]) > summary {
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Age of Reforging キャラクターエディタ</h1>
+        <p style="color: #c0392b;"><b>【重要】利用上の注意</b><br>
+            <b>・編集前に必ずセーブデータのバックアップを取ってください。</b><br>
+            ・各項目の変更がゲームに与える影響は未知数です。予期せぬ動作を引き起こす可能性があります。<br>
+            ・<b>このツールで編集したセーブデータに起因する不具合について、公式開発元へのお問い合わせは絶対に行わないでください。</b><br>
+            ・セーブデータの破損について一切の責任を負いません。（<a href="https://x.com/Kr_x" target="_blank">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します）</p>
+        
+        <p>下記のセーブデータを読み込んでください。<br>
+            <code>C:\Users\{user名}\AppData\LocalLow\PersonaeGames\Age of Reforging The Freelands\Save\{キャラクター名}\SaveData\{セーブデータ名}\sav.dat</code>
+        </p>
+
+        <input type="file" id="fileInput" accept=".dat,.sav">
+        
+        <!-- NPC選択と編集エリア（最初は非表示） -->
+        <div id="editor-area" class="hidden">
+            <div>
+                <label for="npcSearch">NPCリストを絞り込み: <span style="font-weight: normal; font-size: 12px;">(一部英名でないとヒットしないNPCがいます)</span></label>
+                <input type="text" id="npcSearch" placeholder="名前を入力...">
+            </div>
+            
+            <label for="npcSelector">編集するNPCを選択:</label>
+            <select id="npcSelector"></select>
+
+            <!-- ▼▼▼ 個別編集UI ▼▼▼ -->
+            <div id="individual-editor-form"></div>
+            
+            <!-- ▼▼▼ Traits編集UI ▼▼▼ -->
+            <div id="traits-editor-container">
+                <label class="section-label">Traits</label>
+                <div id="traits-list"></div>
+                <button id="add-trait-button" type="button" style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">Traitを追加</button>
+            </div>
+
+            <!-- ▼▼▼ UMA編集UI（最初は非表示） ▼▼▼ -->
+            <div id="uma-editor-container" class="hidden">
+                <label class="section-label">外見 (UMA DNA)</label>
+                <div style="margin-bottom: 15px;">
+                    <button id="save-preset-button" type="button" style="padding: 5px 10px; font-size: 12px; background-color: #17a2b8;">外見をプリセットとして保存</button>
+                    <label class="button-like-label">
+                        プリセットから外見を読み込み
+                        <input type="file" id="load-preset-input" accept=".json" class="hidden">
+                    </label>
+                </div>
+                <div id="uma-editor-form">
+                    <!-- JSによって動的にコンテンツが生成される -->
+                </div>
+            </div>
+            <!-- UMAデータがない場合のメッセージ（uma-editor-containerの外に配置） -->
+            <p id="uma-unavailable-message" class="hidden">セーブデータに外見データがありません。ゲーム上に登場したNPCのみ外見の編集が可能です。</p>
+
+            <label for="jsonEditor">JSONデータ (変更非推奨):
+                <button id="enableJsonEdit" type="button" style="margin-left: 10px; padding: 2px 8px; font-size: 12px;">編集を有効にする</button>
+            </label>
+            <textarea id="jsonEditor" readonly></textarea>
+
+            <div>
+                <button id="saveButton">編集内容をファイルに保存</button>
+                <button id="reloadButton">変更を破棄してリロード</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="editor.js"></script>
+</body>
+</html>
