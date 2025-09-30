@@ -163,7 +163,8 @@
             <code>C:\Users\{user名}\AppData\LocalLow\PersonaeGames\Age of Reforging The Freelands\Save\{キャラクター名}\SaveData\{セーブデータ名}\sav.dat</code>
         </p>
 
-        <input type="file" id="fileInput" accept=".dat,.sav">
+        <input type="file" id="fileInput" accept=".dat">
+        <div data-i18n="drop_hint" style="font-size: 12px; color: #555; margin-top: 5px;"></div>
         
         <!-- NPC選択と編集エリア（最初は非表示） -->
         <div id="editor-area" class="hidden">
@@ -215,7 +216,7 @@
     </div>
 
     <!-- ドラッグ＆ドロップ用オーバーレイ（最初は非表示） -->
-    <div id="drag-overlay" class="hidden">セーブデータをここにドロップ</div>
+    <div id="drag-overlay" class="hidden">Drop save data here</div>
 
     <script src="editor.js"></script>
 </body>

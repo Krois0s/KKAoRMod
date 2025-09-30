@@ -33,6 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const i18n = {
         ja: {
             // HTML内の静的テキスト
+            page_title: "Age of Reforging キャラクターエディタ",
             title: "Age of Reforging キャラクターエディタ",
             important_notes_title: "【重要】利用上の注意",
             important_backup: "・編集前に必ずセーブデータのバックアップを取ってください。",
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
             enable_json_edit_button: "編集を有効にする",
             save_button: "編集内容をファイルに保存",
             reload_button: "変更を破棄してリロード",
+            drop_hint: "（sav.datをドラッグ＆ドロップでも開けます）",
             // 動的生成UI
             group_profile: 'プロフィール',
             group_attributes: '基礎能力値 (Attributes)',
@@ -107,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_34: "しなやか", trait_37: "利発", trait_70: "美貌", trait_85: "熱心", trait_229:"せっかち",
             trait_230: "辛抱強い", trait_247: "幸運", trait_249: "機会主義者", trait_250: "過度な慎重", trait_352: "鍛造習得",
             // アラートメッセージ
-            alert_file_type_error: '対応しているファイルは .dat または .sav です。',
+            alert_file_type_error: '対応しているファイルは .dat です。',
             alert_file_read_error: 'ファイルの読み込みに失敗しました。',
             alert_no_npcs_array: 'セーブデータ内に "npcs" 配列が見つかりませんでした。',
             alert_json_parse_error: 'JSONファイルとして解析できませんでした。\n',
@@ -119,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         en: {
             // HTML内の静的テキスト
+            page_title: "Age of Reforging Character Editor",
             title: "Age of Reforging Character Editor",
             important_notes_title: "Important Notes",
             important_backup: "・Always back up your save data before editing.",
@@ -141,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             enable_json_edit_button: "Enable Editing",
             save_button: "Save Changes to File",
             reload_button: "Discard Changes and Reload",
+            drop_hint: "(You can also open by dragging and dropping sav.dat)",
             // 動的生成UI
             group_profile: 'Profile',
             group_attributes: 'Attributes',
@@ -193,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_34: "Lithe", trait_37: "Intelligent", trait_70: "Beautiful", trait_85: "Diligent", trait_229:"Impatient",
             trait_230: "Patient", trait_247: "Lucky", trait_249: "Opportunist", trait_250: "Overcautious", trait_352: "Learned Forging",
             // アラートメッセージ
-            alert_file_type_error: 'Only .dat or .sav files are supported.',
+            alert_file_type_error: 'Only .dat files are supported.',
             alert_file_read_error: 'Failed to read the file.',
             alert_no_npcs_array: 'Could not find "npcs" array in the save data.',
             alert_json_parse_error: 'Could not parse as a JSON file.\n',
@@ -334,12 +338,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== 言語切り替え関連 =====
     function setLanguage(lang) {
         currentLang = i18n[lang] ? lang : 'en'; // 対応言語がなければ英語にフォールバック
+        document.title = i18n[currentLang].page_title; // ページのタイトルを更新
 
         // 静的テキストの更新
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (i18n[currentLang][key]) {
-                el.innerHTML = i18n[currentLang][key];
+                // HTMLタグを含むキーはinnerHTML、それ以外はtextContentで更新
+                if (key === 'important_disclaimer' || key === 'load_instruction') {
+                    el.innerHTML = i18n[currentLang][key];
+                } else {
+                    el.textContent = i18n[currentLang][key];
+                }
             }
         });
         document.querySelector('label[for="npcSelector"]').textContent = i18n[currentLang].npc_select_label;
@@ -404,7 +414,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         // 拡張子チェック
-        if (!file.name.endsWith('.dat') && !file.name.endsWith('.sav')) {
+        if (!file.name.endsWith('.dat')) {
             alert(i18n[currentLang].alert_file_type_error);
             return;
         }
