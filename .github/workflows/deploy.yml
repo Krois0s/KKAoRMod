@@ -6,6 +6,10 @@ on:
     branches:
       - main  # あなたのデフォルトブランチ名に合わせてください (masterの場合もあります)
 
+# ★★★ ワークフローにリポジトリへの書き込み権限を付与します ★★★
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,6 +24,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # 公開したいファイルが含まれているフォルダを指定
-          publish_dir: ./KKAoRMod/KKCharaEditor
+          publish_dir: ./KKCharaEditor
           # 公開先のブランチ名を指定 (gh-pagesが一般的)
           publish_branch: gh-pages
