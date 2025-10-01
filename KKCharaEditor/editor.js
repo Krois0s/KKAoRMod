@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const dragOverlay = document.getElementById('drag-overlay');
     const langJaButton = document.getElementById('lang-ja');
     const langEnButton = document.getElementById('lang-en');
+    const dataDependentControls = document.getElementById('data-dependent-controls');
+    const dataDependentControlsBottom = document.getElementById('data-dependent-controls-bottom');
 
     // 読み込んだセーブデータ全体を保持
     let fullSaveData = null;
@@ -356,6 +358,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // フォーム全体の入力欄の有効/無効を切り替える関数
+    function setFormEnabled(enabled) {
+        const formElements = individualForm.querySelectorAll('input, select');
+        formElements.forEach(el => el.disabled = !enabled);
+
+        const traitElements = traitsList.querySelectorAll('input, button');
+        traitElements.forEach(el => el.disabled = !enabled);
+        addTraitButton.disabled = !enabled;
+
+        // UMAセクションのボタンと、動的に生成されるフォーム内の要素を制御
+        savePresetButton.disabled = !enabled;
+        loadPresetInput.disabled = !enabled;
+        const umaFormElements = umaEditorForm.querySelectorAll('input, button');
+        umaFormElements.forEach(el => el.disabled = !enabled);
+    }
+
     // ===== 言語切り替え関連 =====
     function setLanguage(lang) {
         currentLang = i18n[lang] ? lang : 'en'; // 対応言語がなければ英語にフォールバック
@@ -437,6 +455,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 最初にフォームの骨格を生成
     createIndividualForm();
+    // 初期状態ではフォームを無効化しておく
+    setFormEnabled(false);
     // 初期言語を設定 (ブラウザの言語が日本語なら日本語、それ以外は英語)
     setLanguage(navigator.language.startsWith('ja') ? 'ja' : 'en');
 
@@ -675,14 +695,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== UMAレシピから個別UIに値をセットする関数 =====
     function updateUmaInputs(npcData) {
         umaEditorForm.innerHTML = ''; // フォームをクリア
+        umaUnavailableMessage.classList.add('hidden'); // メッセージを一旦隠す
+
         if (!npcData.umaRecipe) {
-            umaEditorContainer.classList.add('hidden');
             umaUnavailableMessage.classList.remove('hidden');
+            // UMAデータがない場合、プリセット機能も無効化
+            savePresetButton.disabled = true;
+            loadPresetInput.disabled = true;
             return;
         }
-
-        umaEditorContainer.classList.remove('hidden');
-        umaUnavailableMessage.classList.add('hidden');
 
         try {
             const umaRecipe = JSON.parse(npcData.umaRecipe);
@@ -828,7 +849,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 populateNpcSelector(fullSaveData.npcs, targetIndex);
-                editorArea.classList.remove('hidden');
+                dataDependentControls.classList.remove('hidden');
+                dataDependentControlsBottom.classList.remove('hidden');
+                setFormEnabled(true); // フォームを有効化
                 filterNpcList(); // NPCリスト生成後にフィルタリングを再実行
             } else {
                 alert(i18n[currentLang].alert_no_npcs_array);
@@ -843,7 +866,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== エディタを初期状態に戻す処理 =====
     function resetEditor() {
         fullSaveData = null;
-        editorArea.classList.add('hidden');
+        dataDependentControls.classList.add('hidden');
+        dataDependentControlsBottom.classList.add('hidden');
+        setFormEnabled(false); // フォームを無効化
         fileInput.value = '';
     }
 
