@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             save_preset_button: "外見をプリセットとして保存",
             load_preset_button_label: "プリセットから外見を読み込み",
             load_preset_button: "プリセットから外見を読み込み",
-            uma_unavailable_message: "セーブデータに外見データがありません。",
+            uma_unavailable_message: "このキャラクターは外見データを持っていません。",
             json_editor_label: "JSONデータ (変更非推奨):",
             enable_json_edit_button: "編集を有効にする",
             save_button: "編集内容をファイルに保存",
@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             save_preset_button: "Save Appearance as Preset",
             load_preset_button_label: "Load Appearance from Preset",
             load_preset_button: "Load from Preset",
-            uma_unavailable_message: "No appearance data in the save file.",
+            uma_unavailable_message: "This character does not have appearance data.",
             json_editor_label: "JSON Data (Not Recommended to Edit):",
             enable_json_edit_button: "Enable Editing",
             save_button: "Save Changes to File",
@@ -370,6 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // UMAセクションのボタンと、動的に生成されるフォーム内の要素を制御
         savePresetButton.disabled = !enabled;
         loadPresetInput.disabled = !enabled;
+        loadPresetInput.parentElement.classList.toggle('disabled', !enabled);
         const umaFormElements = umaEditorForm.querySelectorAll('input, button');
         umaFormElements.forEach(el => el.disabled = !enabled);
     }
@@ -696,12 +697,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUmaInputs(npcData) {
         umaEditorForm.innerHTML = ''; // フォームをクリア
         umaUnavailableMessage.classList.add('hidden'); // メッセージを一旦隠す
+ 
+        // 外見データの有無をチェック
+        const hasUmaRecipe = npcData && npcData.umaRecipe;
 
-        if (!npcData.umaRecipe) {
+        // プリセット関連ボタンの有効/無効を切り替え
+        savePresetButton.disabled = !hasUmaRecipe;
+        loadPresetInput.disabled = !hasUmaRecipe;
+        loadPresetInput.parentElement.classList.toggle('disabled', !hasUmaRecipe);
+
+        if (!hasUmaRecipe) {
             umaUnavailableMessage.classList.remove('hidden');
-            // UMAデータがない場合、プリセット機能も無効化
-            savePresetButton.disabled = true;
-            loadPresetInput.disabled = true;
             return;
         }
 
