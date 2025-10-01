@@ -243,41 +243,41 @@ document.addEventListener('DOMContentLoaded', () => {
             titleKey: 'group_attributes',
             fields: [
                 { key: 'potential', labelKey: 'label_potential', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSstrength', labelKey: 'label_BSstrength', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSendurance', labelKey: 'label_BSendurance', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSagility', labelKey: 'label_BSagility', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSprecision', labelKey: 'label_BSprecision', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSintelligence', labelKey: 'label_BSintelligence', type: 'number', path: ['humanAttribute'] },
-                { key: 'BSwillpower', labelKey: 'label_BSwillpower', type: 'number', path: ['humanAttribute'] },
+                { key: 'BSstrength', labelKey: 'label_BSstrength', type: 'number', path: ['humanAttribute'], min: 0, max: 99 },
+                { key: 'BSendurance', labelKey: 'label_BSendurance', type: 'number', path: ['humanAttribute'], min: 0, max: 99 },
+                { key: 'BSagility', labelKey: 'label_BSagility', type: 'number', path: ['humanAttribute'], min: 0, max: 99 },
+                { key: 'BSprecision', labelKey: 'label_BSprecision', type: 'number', path: ['humanAttribute'], min: 0, max: 99 },
+                { key: 'BSintelligence', labelKey: 'label_BSintelligence', type: 'number', path: ['humanAttribute'], min: 0, max: 99 },
+                { key: 'BSwillpower', labelKey: 'label_BSwillpower', type: 'number', path: ['humanAttribute'], min: 0, max: 99 },
             ]
         },
         {
             titleKey: 'group_talents',
             fields: [
-                { key: 'BSPersuade', labelKey: 'label_BSPersuade', type: 'number', path: ['humanTalent'] },
-                { key: 'BSBargain', labelKey: 'label_BSBargain', type: 'number', path: ['humanTalent'] },
-                { key: 'BSIntimidate', labelKey: 'label_BSIntimidate', type: 'number', path: ['humanTalent'] },
-                { key: 'BSScholarly', labelKey: 'label_BSScholarly', type: 'number', path: ['humanTalent'] },
-                { key: 'BSPathfind', labelKey: 'label_BSPathfind', type: 'number', path: ['humanTalent'] },
-                { key: 'BSInsight', labelKey: 'label_BSInsight', type: 'number', path: ['humanTalent'] },
-                { key: 'BSMechanics', labelKey: 'label_BSMechanics', type: 'number', path: ['humanTalent'] },
-                { key: 'BSSneak', labelKey: 'label_BSSneak', type: 'number', path: ['humanTalent'] },
-                { key: 'BSTheft', labelKey: 'label_BSTheft', type: 'number', path: ['humanTalent'] },
-                { key: 'BSSmithing', labelKey: 'label_BSSmithing', type: 'number', path: ['humanTalent'] },
-                { key: 'BSAlchemy', labelKey: 'label_BSAlchemy', type: 'number', path: ['humanTalent'] },
-                { key: 'BSCooking', labelKey: 'label_BSCooking', type: 'number', path: ['humanTalent'] },
-                { key: 'BSMedical', labelKey: 'label_BSMedical', type: 'number', path: ['humanTalent'] },
-                { key: 'BSTraining', labelKey: 'label_BSTraining', type: 'number', path: ['humanTalent'] },
-                { key: 'BSTorture', labelKey: 'label_BSTorture', type: 'number', path: ['humanTalent'] },
+                { key: 'BSPersuade', labelKey: 'label_BSPersuade', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSBargain', labelKey: 'label_BSBargain', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSIntimidate', labelKey: 'label_BSIntimidate', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSScholarly', labelKey: 'label_BSScholarly', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSPathfind', labelKey: 'label_BSPathfind', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSInsight', labelKey: 'label_BSInsight', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSMechanics', labelKey: 'label_BSMechanics', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSSneak', labelKey: 'label_BSSneak', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSTheft', labelKey: 'label_BSTheft', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSSmithing', labelKey: 'label_BSSmithing', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSAlchemy', labelKey: 'label_BSAlchemy', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSCooking', labelKey: 'label_BSCooking', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSMedical', labelKey: 'label_BSMedical', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSTraining', labelKey: 'label_BSTraining', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
+                { key: 'BSTorture', labelKey: 'label_BSTorture', type: 'number', path: ['humanTalent'], min: 0, max: 99 },
             ]
         },
         {
             titleKey: 'group_status',
             fields: [
-                { key: 'health', labelKey: 'label_health', type: 'number' },
-                { key: 'morale', labelKey: 'label_morale', type: 'number' },
-                { key: 'satiety', labelKey: 'label_satiety', type: 'number' },
-                { key: 'vigor', labelKey: 'label_vigor', type: 'number' },
+                { key: 'health', labelKey: 'label_health', type: 'number', min: 0, max: 100 },
+                { key: 'morale', labelKey: 'label_morale', type: 'number', min: 0, max: 100 },
+                { key: 'satiety', labelKey: 'label_satiety', type: 'number', min: 0, max: 100 },
+                { key: 'vigor', labelKey: 'label_vigor', type: 'number', min: 0, max: 100 },
             ]
         }
     ];
@@ -325,12 +325,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         inputElement.readOnly = true;
                         inputElement.style.backgroundColor = '#e9ecef';
                     }
+                if (field.min !== undefined) inputElement.min = field.min;
+                if (field.max !== undefined) inputElement.max = field.max;
                 }
                 // 個別の幅が指定されていれば適用
                 if (field.inputWidth) {
                     inputElement.style.width = field.inputWidth;
                 }      
-                if (!field.readonly) inputElement.addEventListener('input', updateJsonEditorFromInputs);
+                if (!field.readonly) {
+                    inputElement.addEventListener('input', updateJsonEditorFromInputs);
+                    // 値の範囲をチェックし、範囲外なら補正するリスナーを追加
+                    if (field.min !== undefined || field.max !== undefined) {
+                        inputElement.addEventListener('change', (e) => {
+                            const value = parseFloat(e.target.value);
+                            if (field.max !== undefined && value > field.max) {
+                                e.target.value = field.max;
+                            } else if (field.min !== undefined && value < field.min) {
+                                e.target.value = field.min;
+                            }
+                        });
+                    }
+                }
 
                 div.appendChild(label);
                 div.appendChild(inputElement);
@@ -349,6 +364,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 静的テキストの更新
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
+            // load_preset_button_label は子要素を持つため、中身を直接書き換えない
+            if (key === 'load_preset_button_label') {
+                return;
+            }
+
             if (i18n[currentLang][key]) {
                 // HTMLタグを含むキーはinnerHTML、それ以外はtextContentで更新
                 if (key === 'important_disclaimer' || key === 'load_instruction') {
@@ -604,6 +624,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const input = document.createElement('input');
         input.type = 'number';
         input.value = value;
+        input.min = 0;
+        input.max = 999;
         input.placeholder = i18n[currentLang].trait_placeholder;
         if (input.value === '') {
             input.classList.add('input-null-warning');
@@ -624,6 +646,10 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         input.addEventListener('input', () => {
+            // 3桁を超える入力を防ぐ
+            if (input.value.length > 3) {
+                input.value = input.value.slice(0, 3);
+            }
             updateNameLabel(input.value);
             updateJsonEditorFromInputs();
         });
