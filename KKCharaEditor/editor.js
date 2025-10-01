@@ -952,6 +952,9 @@ document.addEventListener('DOMContentLoaded', () => {
             umaRecipe.dna[0].packedDna = JSON.stringify(packedDna);
             npcData.umaRecipe = JSON.stringify(umaRecipe);
 
+            // 外見が変更されたので、古いポートレートを削除する
+            npcData.portrait = null;
+
             jsonEditor.value = JSON.stringify(npcData, null, 2);
         } catch (e) {
             console.error("Error updating UMA recipe:", e);
@@ -1049,6 +1052,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             currentNpcData.traits = newTraits;
+
+            // 外見データ(umaRecipe)が変更されたかチェックし、変更されていればportraitをnullにする
+            const originalUmaRecipe = currentNpcOriginalData ? currentNpcOriginalData.umaRecipe : null;
+            if (currentNpcData.umaRecipe !== originalUmaRecipe) {
+                currentNpcData.portrait = null;
+            }
 
             isUpdatingFromJson = true;
             jsonEditor.value = JSON.stringify(currentNpcData, null, 2);
@@ -1172,6 +1181,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const umaRecipeString = e.target.result;
             const currentNpcData = JSON.parse(jsonEditor.value);
             currentNpcData.umaRecipe = umaRecipeString;
+            // プリセット読み込み時も、古いポートレートを削除する
+            currentNpcData.portrait = null;
             jsonEditor.value = JSON.stringify(currentNpcData, null, 2);
             // UIを更新
             updateIndividualInputsFromJson();
