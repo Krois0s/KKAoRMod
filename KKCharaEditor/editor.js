@@ -21,9 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const langEnButton = document.getElementById('lang-en');
     const dataDependentControls = document.getElementById('data-dependent-controls');
     const dataDependentControlsBottom = document.getElementById('data-dependent-controls-bottom');
+    const fileNameDisplay = document.getElementById('file-name-display');
 
     // 読み込んだセーブデータ全体を保持
     let fullSaveData = null;
+    let loadedFileObject = null; // 読み込んだFileオブジェクトを保持する
     let originalFileName = 'save_edited.dat';
     let currentNpcOriginalData = null; // 選択中のNPCの初期データを保持
     let currentNpcOriginalUmaDna = null; // 選択中のNPCの初期UMA DNAデータを保持
@@ -38,10 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
             page_title: "Age of Reforging : TF キャラクターエディタ",
             title: "Age of Reforging : TF キャラクターエディタ",
             important_notes_title: "【重要】利用上の注意",
-            important_backup: "・編集前に必ずセーブデータのバックアップを取ってください。",
+            important_backup_and_disclaimer: "・編集前に必ずセーブデータのバックアップを取ってください、セーブデータの破損について一切の責任を負いません。",
             important_unknown_effects: "・各項目の変更がゲームに与える影響は未知数です。予期せぬ動作を引き起こす可能性があります。",
             important_no_official_contact: "・このツールで編集したセーブデータに起因する不具合について、公式開発元へのお問い合わせは絶対に行わないでください。",
-            important_disclaimer: "・セーブデータの破損について一切の責任を負いません。（<a href=\"https://x.com/Kr_x\" target=\"_blank\" data-i18n=\"bug_report_link\">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します）",
+            important_bug_report: "・<a href=\"https://x.com/Kr_x\" target=\"_blank\" data-i18n=\"bug_report_link\">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します",
             bug_report_link: "不具合報告",
             load_instruction: "下記のセーブデータを読み込んでください。<br><code>C:\\Users\\<b><i>{ユーザー名}</i></b>\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\<b><i>{キャラクター名}</i></b>\\SaveData\\<b><i>{セーブデータ名}</i></b>\\sav.dat</code>",
             filter_npc_list_label: "NPCリストを絞り込み:",
@@ -59,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
             save_button: "編集内容をファイルに保存",
             reload_button: "変更を破棄してリロード",
             drop_hint: "（sav.datをドラッグ＆ドロップでも開けます）",
+            select_file_button: "ファイルを選択",
+            no_file_selected: "選択されていません",
             // 動的生成UI
             group_profile: 'プロフィール',
             group_attributes: '基礎能力値 (Attributes)',
@@ -130,10 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
             page_title: "Age of Reforging : TF Character Editor",
             title: "Age of Reforging : TF Character Editor",
             important_notes_title: "Important Notes",
-            important_backup: "・Always back up your save data before editing.",
+            important_backup_and_disclaimer: "・Always back up your save data before editing. We are not responsible for any save data corruption.",
             important_unknown_effects: "・The effects of changing each item on the game are unknown. It may cause unexpected behavior.",
             important_no_official_contact: "・Do not contact the official developers about any issues caused by save data edited with this tool.",
-            important_disclaimer: "・We are not responsible for any save data corruption. (<a href=\"https://x.com/Kr_x\" target=\"_blank\" data-i18n=\"bug_report_link\">Bug reports</a> are welcome)",
+            important_bug_report: "・<a href=\"https://x.com/Kr_x\" target=\"_blank\" data-i18n=\"bug_report_link\">Bug reports</a> are welcome <del>until I get bored of AoR</del>",
             bug_report_link: "Bug reports",
             load_instruction: "Please load the following save data.<br><code>C:\\Users\\<b><i>{username}</i></b>\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\<b><i>{character_name}</i></b>\\SaveData\\<b><i>{save_name}</i></b>\\sav.dat</code>",
             filter_npc_list_label: "Filter NPC List:",
@@ -151,6 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
             save_button: "Save Changes to File",
             reload_button: "Discard Changes and Reload",
             drop_hint: "(You can also open by dragging and dropping sav.dat)",
+            select_file_button: "Select File",
+            no_file_selected: "No file selected",
             // 動的生成UI
             group_profile: 'Profile',
             group_attributes: 'Attributes',
@@ -394,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (i18n[currentLang][key]) {
                 // HTMLタグを含むキーはinnerHTML、それ以外はtextContentで更新
-                if (key === 'important_disclaimer' || key === 'load_instruction') {
+                if (key === 'important_bug_report' || key === 'load_instruction') {
                     el.innerHTML = i18n[currentLang][key];
                 } else {
                     el.textContent = i18n[currentLang][key];
@@ -506,6 +512,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== ファイル処理の共通関数 =====
     function handleFile(file) {
         if (!file) return;
+        loadedFileObject = file; // 読み込んだFileオブジェクトを保持
+        fileNameDisplay.textContent = file.name; // ファイル名を表示
 
         // 拡張子チェック
         if (!file.name.endsWith('.dat')) {
@@ -879,6 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dataDependentControlsBottom.classList.add('hidden');
         setFormEnabled(false); // フォームを無効化
         fileInput.value = '';
+        fileNameDisplay.textContent = i18n[currentLang].no_file_selected;
     }
 
 
@@ -1087,14 +1096,14 @@ document.addEventListener('DOMContentLoaded', () => {
         reloadButton.addEventListener('click', () => {
             if (confirm(i18n[currentLang].alert_reload_confirm)) {
                 const currentIndex = currentNpcIndex; // 現在選択中のインデックスを保持
-                const fileInput = document.getElementById('fileInput');
-                const file = fileInput.files[0];
-                if (file) {
+                // 保持しているFileオブジェクト、またはfileInputからファイルを取得
+                const fileToReload = loadedFileObject || fileInput.files[0];
+                if (fileToReload) {
                     const reader = new FileReader();
                     reader.onload = (e) => {
                         loadAndDisplayData(e.target.result, currentIndex); // 保持したインデックスを渡す
                     };
-                    reader.readAsText(file);
+                    reader.readAsText(fileToReload);
                 }
             }
         });
