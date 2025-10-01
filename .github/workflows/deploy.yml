@@ -23,21 +23,21 @@ jobs:
         if: env.GA_MEASUREMENT_ID != ''
         env:
           GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+          # Google Analyticsのスクリプト内容を環境変数として定義
+          GA_SCRIPT_CONTENT: |
+            <!-- Google Analytics -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=${{ secrets.GA_MEASUREMENT_ID }}"></script>
+            <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${{ secrets.GA_MEASUREMENT_ID }}');
+            </script>
+            <!-- End Google Analytics -->
         run: |
-          # 注入するスクリプトを一時ファイルに保存
-          cat << 'EOF' > ga_script.txt
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=${{ secrets.GA_MEASUREMENT_ID }}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${{ secrets.GA_MEASUREMENT_ID }}');
-    </script>
-    <!-- End Google Analytics -->
-EOF
-          # awkを使ってプレースホルダーをスクリプトファイルの内容に置換
-          awk -v r="$(cat ga_script.txt)" '{gsub(/<!-- GA_PLACEHOLDER -->/, r)}1' ./KKCharaEditor/index.html > temp.html && mv temp.html ./KKCharaEditor/index.html
+          # sedを使ってプレースホルダーをGA_SCRIPT_CONTENT環境変数の内容に置換
+          # sedの区切り文字として'#'を使用することで、GA_SCRIPT_CONTENT内の'/'と衝突しないようにする
+          sed -i "s#<!-- GA_PLACEHOLDER -->#${GA_SCRIPT_CONTENT}#" ./KKCharaEditor/index.html
 
       # 2. GitHub Pagesにデプロイする
       - name: Deploy to GitHub Pages
