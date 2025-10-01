@@ -18,6 +18,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Google Analyticsのトラッキングコードを注入するステップを追加
+      - name: Inject Google Analytics
+        # secrets.GA_MEASUREMENT_ID が設定されている場合のみ実行
+        if: ${{ secrets.GA_MEASUREMENT_ID != '' }}
+        run: |
+          # 注入するスクリプトを生成
+          GA_SCRIPT="<!-- Google Analytics -->\n    <script async src=\"https://www.googletagmanager.com/gtag/js?id=${{ secrets.GA_MEASUREMENT_ID }}\"></script>\n    <script>\n      window.dataLayer = window.dataLayer || [];\n      function gtag(){dataLayer.push(arguments);}\n      gtag('js', new Date());\n\n      gtag('config', '${{ secrets.GA_MEASUREMENT_ID }}');\n    </script>\n    <!-- End Google Analytics -->"
+          # プレースホルダーを実際のスクリプトに置換
+          # KKCharaEditor/index.html を直接書き換えます。
+          sed -i "s|<!-- GA_PLACEHOLDER -->|${GA_SCRIPT}|" ./KKCharaEditor/index.html
+        env:
+          GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+
       # 2. GitHub Pagesにデプロイする
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

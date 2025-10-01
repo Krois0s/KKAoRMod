@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const i18n = {
         ja: {
             // HTML内の静的テキスト
-            page_title: "Age of Reforging キャラクターエディタ",
-            title: "Age of Reforging キャラクターエディタ",
+            page_title: "Age of Reforging : TF キャラクターエディタ",
+            title: "Age of Reforging : TF キャラクターエディタ",
             important_notes_title: "【重要】利用上の注意",
             important_backup: "・編集前に必ずセーブデータのバックアップを取ってください。",
             important_unknown_effects: "・各項目の変更がゲームに与える影響は未知数です。予期せぬ動作を引き起こす可能性があります。",
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
             save_preset_button: "外見をプリセットとして保存",
             load_preset_button_label: "プリセットから外見を読み込み",
             load_preset_button: "プリセットから外見を読み込み",
-            uma_unavailable_message: "セーブデータに外見データがありません。ゲーム上に登場したNPCのみ外見の編集が可能です。",
+            uma_unavailable_message: "セーブデータに外見データがありません。",
             json_editor_label: "JSONデータ (変更非推奨):",
             enable_json_edit_button: "編集を有効にする",
             save_button: "編集内容をファイルに保存",
@@ -106,8 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_delete: '削除',
             unknown_option: '不明',
             // Trait名
-            trait_34: "しなやか", trait_37: "利発", trait_70: "美貌", trait_85: "熱心", trait_229:"せっかち",
-            trait_230: "辛抱強い", trait_247: "幸運", trait_249: "機会主義者", trait_250: "過度な慎重", trait_352: "鍛造習得",
+            trait_28: "探検家", trait_33: "善意の顔", trait_34: "しなやか", trait_37: "利発", trait_70: "美貌", 
+            trait_73: "近視", trait_74: "どっしり", trait_77: "短気", trait_85: "熱心", trait_228: "戦場の医者", 
+            trait_229:"せっかち", trait_230: "辛抱強い", trait_235: "決定的", trait_236: "愚直", trait_243: "不屈の", 
+            trait_247: "幸運", trait_248: "マゾヒスト", trait_249: "機会主義者", trait_250: "過度な慎重", 
+            trait_259: "不運", trait_309: "斬撃専心", trait_352: "鍛造習得",
             // アラートメッセージ
             alert_file_type_error: '対応しているファイルは .dat です。',
             alert_file_read_error: 'ファイルの読み込みに失敗しました。',
@@ -121,8 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         en: {
             // HTML内の静的テキスト
-            page_title: "Age of Reforging Character Editor",
-            title: "Age of Reforging Character Editor",
+            page_title: "Age of Reforging : TF Character Editor",
+            title: "Age of Reforging : TF Character Editor",
             important_notes_title: "Important Notes",
             important_backup: "・Always back up your save data before editing.",
             important_unknown_effects: "・The effects of changing each item on the game are unknown. It may cause unexpected behavior.",
@@ -139,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             save_preset_button: "Save Appearance as Preset",
             load_preset_button_label: "Load Appearance from Preset",
             load_preset_button: "Load from Preset",
-            uma_unavailable_message: "No appearance data in the save file. Only NPCs that have appeared in the game can have their appearance edited.",
+            uma_unavailable_message: "No appearance data in the save file.",
             json_editor_label: "JSON Data (Not Recommended to Edit):",
             enable_json_edit_button: "Enable Editing",
             save_button: "Save Changes to File",
@@ -194,8 +197,11 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_delete: 'Delete',
             unknown_option: 'Unknown',
             // Trait名
-            trait_34: "Lithe", trait_37: "Intelligent", trait_70: "Beautiful", trait_85: "Diligent", trait_229:"Impatient",
-            trait_230: "Patient", trait_247: "Lucky", trait_249: "Opportunist", trait_250: "Overcautious", trait_352: "Learned Forging",
+            trait_28: "Explorer", trait_33: "Kindly Face", trait_34: "Lithe", trait_37: "Quick Learner", trait_70: "Beautiful", 
+            trait_73: "Shortsighted", trait_74: "Stocky", trait_77: "Impulsive", trait_85: "Diligent", trait_228: "Battlefield Doctor", 
+            trait_229:"Impatient", trait_230: "Patient", trait_235: "Decisive", trait_236: "Pragmatic", trait_243: "Indomitable", 
+            trait_247: "Lucky", trait_248: "Masochist", trait_249: "Opportunist", trait_250: "Overcautious", 
+            trait_259: "Unlucky", trait_309: "Sharp Blade Mastery", trait_352: "Learned Forging",
             // アラートメッセージ
             alert_file_type_error: 'Only .dat files are supported.',
             alert_file_read_error: 'Failed to read the file.',
@@ -355,18 +361,62 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('label[for="npcSelector"]').textContent = i18n[currentLang].npc_select_label;
         document.getElementById('npcSearch').placeholder = i18n[currentLang].label_unitname;
 
-        // 動的フォームの再生成
-        createIndividualForm();
+        // 動的に生成されたフォームのテキストのみを更新
+        updateDynamicFormLanguage();
+    }
 
-        // 既にデータが読み込まれていれば、フォームに値を再設定
-        if (fullSaveData && currentNpcIndex !== null) {
-            displayNpcData(currentNpcIndex);
-        }
+    // フォームの値を維持したまま、ラベル等の言語のみを更新する関数
+    function updateDynamicFormLanguage() {
+        // グループタイトルの更新
+        document.querySelectorAll('.form-group-title').forEach((titleEl, index) => {
+            const group = editableGroups[index];
+            if (group) {
+                titleEl.textContent = i18n[currentLang][group.titleKey] || group.titleKey;
+            }
+        });
+
+        // 各入力欄のラベルとオプションを更新
+        editableGroups.forEach(group => {
+            group.fields.forEach(field => {
+                const label = document.querySelector(`label[for="input-${field.key}"]`);
+                if (label) {
+                    label.textContent = i18n[currentLang][field.labelKey] || field.labelKey;
+                }
+                if (field.type === 'select' && field.options) {
+                    const select = document.getElementById(`input-${field.key}`);
+                    if (select) {
+                        field.options.forEach((opt, optIndex) => {
+                            if (select.options[optIndex]) {
+                                select.options[optIndex].textContent = i18n[currentLang][opt.textKey] || opt.textKey;
+                            }
+                        });
+                    }
+                }
+            });
+        });
+
+        // Traitsセクションの更新
+        const traitInputs = traitsList.querySelectorAll('input[type="number"]');
+        traitInputs.forEach(input => {
+            const nameLabel = input.nextElementSibling;
+            const removeBtn = nameLabel.nextElementSibling;
+            if (nameLabel) {
+                if (input.value) {
+                    const traitName = i18n[currentLang][`trait_${input.value}`];
+                    nameLabel.textContent = traitName || i18n[currentLang].unknown_option;
+                } else {
+                    nameLabel.textContent = '';
+                }
+            }
+            if (removeBtn) removeBtn.textContent = i18n[currentLang].trait_delete;
+        });
     }
 
     langJaButton.addEventListener('click', () => setLanguage('ja'));
     langEnButton.addEventListener('click', () => setLanguage('en'));
 
+    // 最初にフォームの骨格を生成
+    createIndividualForm();
     // 初期言語を設定 (ブラウザの言語が日本語なら日本語、それ以外は英語)
     setLanguage(navigator.language.startsWith('ja') ? 'ja' : 'en');
 
@@ -549,14 +599,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===== Trait入力欄を1つ生成する関数 =====
     function createTraitInput(value = '') {
         const div = document.createElement('div');
-        div.style.display = 'flex';
-        div.style.alignItems = 'center';
-        div.style.marginBottom = '5px';
+        div.className = 'trait-item';
 
         const input = document.createElement('input');
         input.type = 'number';
         input.value = value;
-        input.style.flexGrow = '1';
         input.placeholder = i18n[currentLang].trait_placeholder;
         if (input.value === '') {
             input.classList.add('input-null-warning');
@@ -565,13 +612,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const nameLabel = document.createElement('span');
-        nameLabel.style.marginLeft = '10px';
-        nameLabel.style.fontSize = '12px';
-        nameLabel.style.whiteSpace = 'nowrap'; // 名前が改行されないように
+        nameLabel.className = 'trait-name';
 
         const updateNameLabel = (id) => {
-            const traitName = i18n[currentLang][`trait_${id}`];
-            nameLabel.textContent = traitName || '';
+            if (id) {
+                const traitName = i18n[currentLang][`trait_${id}`];
+                nameLabel.textContent = traitName || i18n[currentLang].unknown_option;
+            } else {
+                nameLabel.textContent = '';
+            }
         };
 
         input.addEventListener('input', () => {
