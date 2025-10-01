@@ -19,25 +19,22 @@ jobs:
 
       # Google Analyticsのトラッキングコードを注入するステップを追加
       - name: Inject Google Analytics
-        # env.GA_MEASUREMENT_ID が空でない場合のみ実行
         if: env.GA_MEASUREMENT_ID != ''
         env:
           GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
-          # Google Analyticsのスクリプト内容を環境変数として定義
-          GA_SCRIPT_CONTENT: |
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "<!-- GA_PLACEHOLDER -->"
+          replace: |
             <!-- Google Analytics -->
-            <script async src="https://www.googletagmanager.com/gtag/js?id=${{ secrets.GA_MEASUREMENT_ID }}"></script>
+            <script async src="https://www.googletagmanager.com/gtag/js?id=${{ env.GA_MEASUREMENT_ID }}"></script>
             <script>
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', '${{ secrets.GA_MEASUREMENT_ID }}');
+              gtag('config', '${{ env.GA_MEASUREMENT_ID }}');
             </script>
             <!-- End Google Analytics -->
-        run: |
-          # sedを使ってプレースホルダーをGA_SCRIPT_CONTENT環境変数の内容に置換
-          # sedの区切り文字として'#'を使用することで、GA_SCRIPT_CONTENT内の'/'と衝突しないようにする
-          sed -i "s#<!-- GA_PLACEHOLDER -->#${GA_SCRIPT_CONTENT}#" ./KKCharaEditor/index.html
 
       # 2. GitHub Pagesにデプロイする
       - name: Deploy to GitHub Pages
