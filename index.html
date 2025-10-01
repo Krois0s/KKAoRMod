@@ -137,9 +137,52 @@
         }
         .button-like-label:hover { background-color: #218838; }
 
+        /* カスタムファイル入力ボタン */
+        .file-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        #file-name-display {
+            font-size: 14px;
+            color: #555;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #e9ecef;
+            flex-grow: 1; /* 横幅いっぱいに広がる */
+        }
+
+        /* プライマリボタン風のラベルスタイル */
+        .btn-primary-label {
+            background-color: #007bff;
+        }
+        .btn-primary-label:hover {
+            background-color: #0056b3;
+        }
+
         /* 情報を示すボタン用のスタイル（ターコイズ色） */
         .btn-info {
             background-color: #17a2b8; /* ターコイズ色 */
+        }
+
+        /* セカンダリボタン（グレー） */
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        /* 警告ボタン（黄色） */
+        .btn-warning {
+            background-color: #ffc107;
+            color: black; /* 黄色背景には黒文字の方が見やすい */
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
         }
 
         /* 無効化されたボタンのスタイル */
@@ -189,6 +232,21 @@
             font-weight: bold;
             pointer-events: none; /* マウスイベントを透過させる */
         }
+
+        /* フローティングアクションボタン */
+        .floating-action-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000; /* 他の要素より手前に表示 */
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column; /* ボタンを縦に並べる */
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
@@ -201,18 +259,23 @@
             </div>
         </div>
         <p style="color: #c0392b;"><b data-i18n="important_notes_title">【重要】利用上の注意</b><br>
-            <b data-i18n="important_backup">・編集前に必ずセーブデータのバックアップを取ってください。</b><br>
+            <b data-i18n="important_backup_and_disclaimer">・編集前に必ずセーブデータのバックアップを取ってください、セーブデータの破損について一切の責任を負いません。</b><br>
             <span data-i18n="important_unknown_effects">・各項目の変更がゲームに与える影響は未知数です。予期せぬ動作を引き起こす可能性があります。</span><br>
             <b data-i18n="important_no_official_contact">・このツールで編集したセーブデータに起因する不具合について、公式開発元へのお問い合わせは絶対に行わないでください。</b><br>
-            <span data-i18n="important_disclaimer">・セーブデータの破損について一切の責任を負いません。（<a href="https://x.com/Kr_x" target="_blank" data-i18n="bug_report_link">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します）</span></p>
+        </p>
+        <p><span data-i18n="important_bug_report">・<a href="https://x.com/Kr_x" target="_blank" data-i18n="bug_report_link">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します</span></p>
         
         <p data-i18n="load_instruction">下記のセーブデータを読み込んでください。<br>
-            <code>C:\Users\{user名}\AppData\LocalLow\PersonaeGames\Age of Reforging The Freelands\Save\{キャラクター名}\SaveData\{セーブデータ名}\sav.dat</code>
+            <code>C:\Users\<b><i>{ユーザー名}</i></b>\AppData\LocalLow\PersonaeGames\Age of Reforging The Freelands\Save\<b><i>{キャラクター名}</i></b>\SaveData\<b><i>{セーブデータ名}</i></b>\sav.dat</code>
         </p>
 
-        <input type="file" id="fileInput" accept=".dat" style="margin-top: 15px; margin-bottom: 15px;">
+        <div class="file-input-wrapper">
+            <label for="fileInput" class="button-like-label btn-primary-label" style="font-weight: bold;" data-i18n="select_file_button">ファイルを選択</label>
+            <input type="file" id="fileInput" accept=".dat" class="hidden">
+            <span id="file-name-display" data-i18n="no_file_selected">選択されていません</span>
+        </div>
 
-        <div data-i18n="drop_hint" style="font-size: 12px; color: #555;"></div>
+        <div data-i18n="drop_hint" style="font-size: 12px; color: #555; margin-bottom: 15px;"></div>
         
         <!-- NPC選択と編集エリア（最初は非表示） -->
         <div id="editor-area">
@@ -261,9 +324,9 @@
                     <button id="enableJsonEdit" type="button" style="margin-left: 10px; padding: 2px 8px; font-size: 12px;" data-i18n="enable_json_edit_button">編集を有効にする</button>
                 </div>
                 <textarea id="jsonEditor" readonly></textarea>
-                <div>
+                <div class="floating-action-buttons">
                     <button id="saveButton" data-i18n="save_button">編集内容をファイルに保存</button>
-                    <button id="reloadButton" data-i18n="reload_button">変更を破棄してリロード</button>
+                    <button id="reloadButton" class="btn-warning" data-i18n="reload_button">変更を破棄してリロード</button>
                 </div>
             </div>
         </div>
