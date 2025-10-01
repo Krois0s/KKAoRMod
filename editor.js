@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             important_no_official_contact: "・このツールで編集したセーブデータに起因する不具合について、公式開発元へのお問い合わせは絶対に行わないでください。",
             important_disclaimer: "・セーブデータの破損について一切の責任を負いません。（<a href=\"https://x.com/Kr_x\" target=\"_blank\" data-i18n=\"bug_report_link\">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します）",
             bug_report_link: "不具合報告",
-            load_instruction: "下記のセーブデータを読み込んでください。<br><code>C:\\Users\\{user名}\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\{キャラクター名}\\SaveData\\{セーブデータ名}\\sav.dat</code>",
+            load_instruction: "下記のセーブデータを読み込んでください。<br><code>C:\\Users\\<b><i>{ユーザー名}</i></b>\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\<b><i>{キャラクター名}</i></b>\\SaveData\\<b><i>{セーブデータ名}</i></b>\\sav.dat</code>",
             filter_npc_list_label: "NPCリストを絞り込み:",
             filter_npc_list_note: "(一部英名でないとヒットしないNPCがいます)",
             npc_select_label: "編集するNPCを選択:",
@@ -69,10 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
             label_race: '種族',
             label_subRace: 'サブ種族',
             label_unitVoice: 'ボイス',
-            label_voiceVolume: '音量',
-            label_voicePitch: 'ピッチ',
+            label_voiceVolume: '声音量',
+            label_voicePitch: '声ピッチ',
             label_exp: '経験値',
-            label_potential: 'ポテンシャル',
+            label_potential: '潜在的',
             label_BSstrength: '筋力',
             label_BSendurance: '耐久力',
             label_BSagility: '敏捷',
@@ -108,11 +108,12 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_delete: '削除',
             unknown_option: '不明',
             // Trait名
-            trait_28: "探検家", trait_33: "善意の顔", trait_34: "しなやか", trait_37: "利発", trait_39: "決死", trait_70: "美貌", 
-            trait_73: "近視", trait_74: "どっしり", trait_77: "短気", trait_85: "熱心", trait_87: "弱者いじめ", trait_228: "戦場の医者",
-            trait_229:"せっかち", trait_230: "辛抱強い", trait_235: "決定的", trait_236: "愚直", trait_243: "不屈の", 
-            trait_247: "幸運", trait_248: "マゾヒスト", trait_249: "機会主義者", trait_250: "過度な慎重", 
-            trait_259: "不運", trait_309: "斬撃専心", trait_352: "鍛造習得",
+            trait_28: "探検家", trait_33: "善意の顔", trait_34: "しなやか", trait_35: "遠視", trait_36: "おしゃべり上手", trait_37: "利発", 
+            trait_38: "岩石の子", trait_39: "決死", trait_69: "自惚れ", trait_70: "美貌", trait_73: "近視", trait_74: "どっしり", 
+            trait_75: "軟弱", trait_76: "残酷な", trait_77: "短気", trait_85: "熱心", trait_87: "弱者いじめ", trait_228: "戦場の医者", 
+            trait_229:"せっかち", trait_230: "辛抱強い", trait_231: "チームワーク", trait_232: "生まれつきの料理人", trait_235: "決定的", 
+            trait_236: "愚直", trait_238: "優秀な見張り", trait_243: "不屈の", trait_247: "幸運", trait_248: "マゾヒスト", 
+            trait_249: "機会主義者", trait_250: "過度な慎重", trait_259: "不運", trait_309: "斬撃専心", trait_352: "鍛造習得",
             // アラートメッセージ
             alert_file_type_error: '対応しているファイルは .dat です。',
             alert_file_read_error: 'ファイルの読み込みに失敗しました。',
@@ -134,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
             important_no_official_contact: "・Do not contact the official developers about any issues caused by save data edited with this tool.",
             important_disclaimer: "・We are not responsible for any save data corruption. (<a href=\"https://x.com/Kr_x\" target=\"_blank\" data-i18n=\"bug_report_link\">Bug reports</a> are welcome)",
             bug_report_link: "Bug reports",
-            load_instruction: "Please load the following save data.<br><code>C:\\Users\\{username}\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\{character_name}\\SaveData\\{save_name}\\sav.dat</code>",
+            load_instruction: "Please load the following save data.<br><code>C:\\Users\\<b><i>{username}</i></b>\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\<b><i>{character_name}</i></b>\\SaveData\\<b><i>{save_name}</i></b>\\sav.dat</code>",
             filter_npc_list_label: "Filter NPC List:",
             filter_npc_list_note: "",
             npc_select_label: "Select NPC to Edit:",
@@ -199,10 +200,12 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_delete: 'Delete',
             unknown_option: 'Unknown',
             // Trait名
-            trait_28: "Explorer", trait_33: "Kindly Face", trait_34: "Lithe", trait_37: "Quick Learner", trait_39: "Unchained Beast", trait_70: "Beautiful", 
-            trait_73: "Shortsighted", trait_74: "Stocky", trait_77: "Impulsive", trait_85: "Diligent", trait_87: "Bully", trait_228: "Battlefield Doctor",
-            trait_229:"Impatient", trait_230: "Patient", trait_235: "Decisive", trait_236: "Pragmatic", trait_243: "Indomitable", 
-            trait_247: "Lucky", trait_248: "Masochist", trait_249: "Opportunist", trait_250: "Overcautious", 
+            trait_28: "Explorer", trait_33: "Kindly Face", trait_34: "Lithe", trait_35: "Farsighted", trait_36: "Silver Tongue", 
+            trait_37: "Quick Learner", trait_38: "Son of Stone", trait_39: "Unchained Beast", trait_69: "Conceited", trait_70: "Beautiful", 
+            trait_73: "Shortsighted", trait_74: "Stocky", trait_75: "Flabby", trait_76: "Cruel", trait_77: "Impulsive", 
+            trait_85: "Diligent", trait_87: "Bully", trait_228: "Battlefield Doctor", trait_229:"Impatient", trait_230: "Patient", 
+            trait_231: "Team Spirit", trait_232: "Inborn Cook", trait_235: "Decisive", trait_236: "Pragmatic", trait_238: "Excellent Sentinel", 
+            trait_243: "Indomitable", trait_247: "Lucky", trait_248: "Masochist", trait_249: "Opportunist", trait_250: "Overcautious", 
             trait_259: "Unlucky", trait_309: "Sharp Blade Mastery", trait_352: "Learned Forging",
             // アラートメッセージ
             alert_file_type_error: 'Only .dat files are supported.',
@@ -384,7 +387,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             // load_preset_button_label は子要素を持つため、中身を直接書き換えない
-            if (key === 'load_preset_button_label') {
+            // filter_npc_list_label も同様
+            if (key === 'load_preset_button_label' || key === 'filter_npc_list_label') {
                 return;
             }
 
@@ -460,7 +464,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setFormEnabled(false);
     // 初期言語を設定 (ブラウザの言語が日本語なら日本語、それ以外は英語)
     setLanguage(navigator.language.startsWith('ja') ? 'ja' : 'en');
-
 
     // ===== ファイル選択時の処理 =====
     // ファイル選択ダイアログが開くたびにinputの値をリセットする
@@ -1103,9 +1106,16 @@ document.addEventListener('DOMContentLoaded', () => {
     saveButton.addEventListener('click', () => {
         if (!fullSaveData) return;
         try {
+            // ヘルパー関数: 非ASCII文字を \uXXXX 形式にエスケープする
+            function escapeNonAscii(str) {
+                // https://stackoverflow.com/questions/7499473/need-to-escape-non-ascii-characters-in-json
+                return str.replace(/[\u007f-\uffff]/g, c => '\\u' + ('0000' + c.charCodeAt(0).toString(16).toUpperCase()).slice(-4));
+            }
+
             const editedNpcData = JSON.parse(jsonEditor.value);
             fullSaveData.npcs[npcSelector.value] = editedNpcData;
-            const minifiedJsonString = JSON.stringify(fullSaveData);
+            let minifiedJsonString = JSON.stringify(fullSaveData);
+            minifiedJsonString = escapeNonAscii(minifiedJsonString); // ゲームの形式に合わせてエスケープ
             
             const blob = new Blob([minifiedJsonString], { type: 'application/octet-stream' });
             const url = URL.createObjectURL(blob);
