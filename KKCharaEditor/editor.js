@@ -349,6 +349,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 静的テキストの更新
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
+            // load_preset_button_label は子要素を持つため、中身を直接書き換えない
+            if (key === 'load_preset_button_label') {
+                return;
+            }
+
             if (i18n[currentLang][key]) {
                 // HTMLタグを含むキーはinnerHTML、それ以外はtextContentで更新
                 if (key === 'important_disclaimer' || key === 'load_instruction') {
