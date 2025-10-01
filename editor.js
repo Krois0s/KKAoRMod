@@ -106,8 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_delete: '削除',
             unknown_option: '不明',
             // Trait名
-            trait_28: "探検家", trait_33: "善意の顔", trait_34: "しなやか", trait_37: "利発", trait_70: "美貌", 
-            trait_73: "近視", trait_74: "どっしり", trait_77: "短気", trait_85: "熱心", trait_228: "戦場の医者", 
+            trait_28: "探検家", trait_33: "善意の顔", trait_34: "しなやか", trait_37: "利発", trait_39: "決死", trait_70: "美貌", 
+            trait_73: "近視", trait_74: "どっしり", trait_77: "短気", trait_85: "熱心", trait_87: "弱者いじめ", trait_228: "戦場の医者",
             trait_229:"せっかち", trait_230: "辛抱強い", trait_235: "決定的", trait_236: "愚直", trait_243: "不屈の", 
             trait_247: "幸運", trait_248: "マゾヒスト", trait_249: "機会主義者", trait_250: "過度な慎重", 
             trait_259: "不運", trait_309: "斬撃専心", trait_352: "鍛造習得",
@@ -197,8 +197,8 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_delete: 'Delete',
             unknown_option: 'Unknown',
             // Trait名
-            trait_28: "Explorer", trait_33: "Kindly Face", trait_34: "Lithe", trait_37: "Quick Learner", trait_70: "Beautiful", 
-            trait_73: "Shortsighted", trait_74: "Stocky", trait_77: "Impulsive", trait_85: "Diligent", trait_228: "Battlefield Doctor", 
+            trait_28: "Explorer", trait_33: "Kindly Face", trait_34: "Lithe", trait_37: "Quick Learner", trait_39: "Unchained Beast", trait_70: "Beautiful", 
+            trait_73: "Shortsighted", trait_74: "Stocky", trait_77: "Impulsive", trait_85: "Diligent", trait_87: "Bully", trait_228: "Battlefield Doctor",
             trait_229:"Impatient", trait_230: "Patient", trait_235: "Decisive", trait_236: "Pragmatic", trait_243: "Indomitable", 
             trait_247: "Lucky", trait_248: "Masochist", trait_249: "Opportunist", trait_250: "Overcautious", 
             trait_259: "Unlucky", trait_309: "Sharp Blade Mastery", trait_352: "Learned Forging",
