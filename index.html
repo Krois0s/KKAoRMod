@@ -142,6 +142,17 @@
             background-color: #17a2b8; /* ターコイズ色 */
         }
 
+        /* 無効化されたボタンのスタイル */
+        button:disabled,
+        .button-like-label.disabled {
+            background-color: #6c757d; /* グレー */
+            cursor: not-allowed;
+            opacity: 0.65;
+        }
+        button:disabled:hover,
+        .button-like-label.disabled:hover {
+            background-color: #6c757d; /* ホバー時も色を変えない */
+        }
         /* アコーディオンUIのスタイル */
         details > summary {
             cursor: pointer;
@@ -235,12 +246,12 @@
                         <input type="file" id="load-preset-input" accept=".json" class="hidden" >
                     </label>
                 </div>
+                <!-- UMAデータがない場合のメッセージをコンテナ内に移動 -->
+                <p id="uma-unavailable-message" class="hidden" data-i18n="uma_unavailable_message">セーブデータに外見データがありません。</p>
                 <div id="uma-editor-form">
                     <!-- JSによって動的にコンテンツが生成される -->
                 </div>
             </div>
-            <!-- UMAデータがない場合のメッセージ（uma-editor-containerの外に配置） -->
-            <p id="uma-unavailable-message" class="hidden" data-i18n="uma_unavailable_message">セーブデータに外見データがありません。</p>
 
             <!-- ▼▼▼ データ読み込み後に表示されるUI ▼▼▼ -->
             <div id="data-dependent-controls-bottom" class="hidden">
