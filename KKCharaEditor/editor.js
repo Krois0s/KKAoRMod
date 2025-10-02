@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
             label_unitVoice: 'ボイス',
             label_voiceVolume: '声音量',
             label_voicePitch: '声ピッチ',
+            label_isMagician: '魔法使い',
             label_exp: '経験値',
             label_potential: '潜在的',
             label_BSstrength: '筋力',
@@ -104,6 +105,8 @@ document.addEventListener('DOMContentLoaded', () => {
             label_vigor: '活力',
             gender_male: '男性',
             gender_female: '女性',
+            isMagician_true: 'はい',
+            isMagician_false: 'いいえ',
             race_human: '人間',
             race_elf: 'エルフ',
             race_dwarf: 'ドワーフ',
@@ -169,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             label_unitVoice: 'Voice',
             label_voiceVolume: 'Volume',
             label_voicePitch: 'Pitch',
+            label_isMagician: 'Magician',
             label_exp: 'Experience',
             label_potential: 'Potential',
             label_BSstrength: 'Strength',
@@ -198,6 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
             label_vigor: 'Vigor',
             gender_male: 'Male',
             gender_female: 'Female',
+            isMagician_true: 'Yes',
+            isMagician_false: 'No',
             race_human: 'Human',
             race_elf: 'Elf',
             race_dwarf: 'Dwarf',
@@ -248,6 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { key: 'voiceVolume', labelKey: 'label_voiceVolume', type: 'number', step: 0.1 },
                 { key: 'voicePitch', labelKey: 'label_voicePitch', type: 'number', step: 0.01 },
                 { key: 'exp', labelKey: 'label_exp', type: 'number' },
+                { key: 'isMagician', labelKey: 'label_isMagician', type: 'checkbox' },
             ]
         },
         {
@@ -327,6 +334,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             inputElement.appendChild(option);
                         });
                     }
+                } else if (field.type === 'checkbox') {
+                    inputElement = document.createElement('input');
+                    inputElement.type = 'checkbox';
+                    inputElement.id = `input-${field.key}`;
+                    // チェックボックスは幅を固定しない
+                    inputElement.style.width = 'auto';
+                    inputElement.classList.add('large-checkbox'); // サイズ変更用のクラスを追加
                 } else { // 'text', 'number'
                     inputElement = document.createElement('input');
                     inputElement.type = field.type;
@@ -628,11 +642,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                inputElement.value = (value !== null && value !== undefined) ? value : '';
-                if (value === '' || value === null) {
-                    inputElement.classList.add('input-null-warning');
-                } else {
-                    inputElement.classList.remove('input-null-warning');
+                if (field.type === 'checkbox') {
+                    inputElement.checked = (value === true); // trueの場合のみチェック
+                }
+                else {
+                    inputElement.value = (value !== null && value !== undefined) ? value : '';
+                    if (value === '' || value === null) {
+                        inputElement.classList.add('input-null-warning');
+                    } else {
+                        inputElement.classList.remove('input-null-warning');
+                    }
                 }
             });
         });
@@ -1013,6 +1032,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 値の型変換
                     if (value === '' || value === null) {
                         value = null; // 空文字はnullとして扱う
+                    } else if (field.type === 'checkbox') {
+                        value = inputElement.checked; // チェックボックスの状態(true/false)をそのまま使う
                     } else if (field.type === 'number' || field.type === 'select') {
                         // selectも数値として扱う
                         const num = parseFloat(value);
