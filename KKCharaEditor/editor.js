@@ -1145,6 +1145,14 @@ document.addEventListener('DOMContentLoaded', () => {
     saveButton.addEventListener('click', () => {
         if (!fullSaveData) return;
         try {
+            // Google Analyticsにイベントを送信
+            if (typeof gtag === 'function') {
+                gtag('event', 'save_file', {
+                    'event_category': 'Editor Action',
+                    'event_label': 'Save Button Click'
+                });
+            }
+
             // ヘルパー関数: 非ASCII文字を \uXXXX 形式にエスケープする
             function escapeNonAscii(str) {
                 // https://stackoverflow.com/questions/7499473/need-to-escape-non-ascii-characters-in-json
