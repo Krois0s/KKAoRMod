@@ -77,6 +77,8 @@ document.addEventListener('DOMContentLoaded', () => {
             label_voiceVolume: '声音量',
             label_voicePitch: '声ピッチ',
             label_isMagician: '魔法使い',
+            label_goodness: '善悪度',
+            label_lawfulness: '秩序度',
             label_exp: '経験値',
             label_potential: '潜在的',
             label_BSstrength: '筋力',
@@ -174,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
             label_voiceVolume: 'Volume',
             label_voicePitch: 'Pitch',
             label_isMagician: 'Magician',
+            label_goodness: 'Goodness',
+            label_lawfulness: 'Lawfulness',
             label_exp: 'Experience',
             label_potential: 'Potential',
             label_BSstrength: 'Strength',
@@ -256,6 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 { key: 'voicePitch', labelKey: 'label_voicePitch', type: 'number', step: 0.01 },
                 { key: 'exp', labelKey: 'label_exp', type: 'number' },
                 { key: 'isMagician', labelKey: 'label_isMagician', type: 'checkbox' },
+                { key: 'goodness', labelKey: 'label_goodness', type: 'number', min: -100, max: 100 },
+                { key: 'lawfulness', labelKey: 'label_lawfulness', type: 'number', min: -100, max: 100 },
             ]
         },
         {
@@ -1238,6 +1244,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ===== 外見プリセットの読み込み処理 =====
+    // ファイル選択ダイアログが開くたびにinputの値をリセットする
+    // これにより、同じファイルを連続で選択してもchangeイベントが発火するようになる
+    loadPresetInput.addEventListener('click', (event) => {
+        event.target.value = null;
+    });
+
     loadPresetInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (!file) return;
