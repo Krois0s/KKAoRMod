@@ -3,7 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Age of Reforging Character Editor</title>
-    <meta name="referrer" content="strict-origin-when-cross-origin">    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://www.google-analytics.com;">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- 
+      Content-Security-Policy:
+      - script-src: GAのインラインスクリプトを許可するため 'unsafe-inline' を追加。
+      - connect-src: GAのデータ送信先として *.google-analytics.com と *.googletagmanager.com を追加。
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https://*.google-analytics.com https://*.googletagmanager.com;">
     <!-- GA_PLACEHOLDER -->
     <style>
         body { font-family: sans-serif; padding: 20px; max-width: 960px; margin: 0 auto; background-color: #f4f4f4; }
