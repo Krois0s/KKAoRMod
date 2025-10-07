@@ -456,8 +456,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const traitElements = traitsList.querySelectorAll('input, button');
         traitElements.forEach(el => el.disabled = !enabled);
         addTraitButton.disabled = !enabled;
+        
+        // equipsListは動的に再生成されるため、都度取得する
+        const currentEquipsList = document.getElementById('equips-list');
+        if (!currentEquipsList) return;
 
-        const equipElements = equipsList.querySelectorAll('input, button');
+        const equipElements = currentEquipsList.querySelectorAll('input, select, button');
         equipElements.forEach(el => el.disabled = !enabled);
 
 
@@ -887,11 +891,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ===== 装備品UIを生成/更新する関数 =====
     function updateEquipsInputs(npcData) {
-        equipsList.innerHTML = '';
-        // equips-editor-container の子要素をすべて削除
-        while (equipsEditorContainer.firstChild) {
-            equipsEditorContainer.removeChild(equipsEditorContainer.firstChild);
-        }
+        equipsEditorContainer.innerHTML = ''; // コンテナの中身を一度にクリア
 
         const details = document.createElement('details');
         const summary = document.createElement('summary');
