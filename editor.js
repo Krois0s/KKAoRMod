@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const traitsList = document.getElementById('traits-list');
     const addTraitButton = document.getElementById('add-trait-button');
     const umaEditorContainer = document.getElementById('uma-editor-container');
+    const equipsEditorContainer = document.getElementById('equips-editor-container');
+    const equipsList = document.getElementById('equips-list');
     const umaEditorForm = document.getElementById('uma-editor-form');
     const umaUnavailableMessage = document.getElementById('uma-unavailable-message');
     const savePresetButton = document.getElementById('save-preset-button');
@@ -52,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             npc_select_label: "編集するNPCを選択:",
             traits_label: "Traits",
             add_trait_button: "Traitを追加",
+            equips_label: "装備品",
             appearance_label: "外見 (UMA DNA)",
             save_preset_button: "外見をプリセットとして保存",
             load_preset_button_label: "プリセットから外見を読み込み",
@@ -117,6 +120,34 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_placeholder: 'Trait ID',
             trait_delete: '削除',
             unknown_option: '不明',
+            // 装備品
+            equip_slot_0: "メインハンド",
+            equip_slot_1: "サブハンド",
+            equip_slot_2: "頭",
+            equip_slot_3: "首",
+            equip_slot_4: "胸",
+            equip_slot_5: "アクセサリー",
+            equip_slot_6: "ベルト",
+            equip_slot_7: "脚",
+            equip_slot_8: "指",
+            equip_slot_9: "指",
+            equip_not_equipped: "装備なし",
+            equip_add_attr: "効果追加",
+            equip_attr_type: "Type",
+            equip_subSlotIndex: "サブスロット",
+            equip_stackNum: "スタック数",
+            equip_isNew: "New",
+            equip_isStolen: "盗品",
+            equip_id: "ID",
+            equip_quality: "品質",
+            equip_durability: "耐久度",
+            equip_add_attrs_title: "付属効果",
+            equip_quality_1: "コモン",
+            equip_quality_2: "アンコモン",
+            equip_quality_3: "レア",
+            equip_quality_4: "エピック",
+            equip_quality_5: "レジェンダリー",
+            equip_level_alter: "LvlAlter",
             // Trait名
             trait_28: "探検家", trait_33: "善意の顔", trait_34: "しなやか", trait_35: "遠視", trait_36: "おしゃべり上手", trait_37: "利発", 
             trait_38: "岩石の子", trait_39: "決死", trait_69: "自惚れ", trait_70: "美貌", trait_73: "近視", trait_74: "どっしり", 
@@ -151,6 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             npc_select_label: "Select NPC to Edit:",
             traits_label: "Traits",
             add_trait_button: "Add Trait",
+            equips_label: "Equipment",
             appearance_label: "Appearance (UMA DNA)",
             save_preset_button: "Save Appearance as Preset",
             load_preset_button_label: "Load Appearance from Preset",
@@ -216,6 +248,34 @@ document.addEventListener('DOMContentLoaded', () => {
             trait_placeholder: 'Trait ID',
             trait_delete: 'Delete',
             unknown_option: 'Unknown',
+            // Equipment
+            equip_slot_0: "Main Hand",
+            equip_slot_1: "Off Hand",
+            equip_slot_2: "Head",
+            equip_slot_3: "Neck",
+            equip_slot_4: "Chest",
+            equip_slot_5: "Relic",
+            equip_slot_6: "Belt",
+            equip_slot_7: "Legs",
+            equip_slot_8: "Finger",
+            equip_slot_9: "Finger",
+            equip_not_equipped: "Not Equipped",
+            equip_add_attr: "Add Effect",
+            equip_attr_type: "Type",
+            equip_subSlotIndex: "Sub Slot",
+            equip_stackNum: "Stack",
+            equip_isNew: "New",
+            equip_isStolen: "Stolen",
+            equip_id: "ID",
+            equip_quality: "Quality",
+            equip_durability: "Durability",
+            equip_add_attrs_title: "Additional Attributes",
+            equip_quality_1: "Common",
+            equip_quality_2: "Uncommon",
+            equip_quality_3: "Rare",
+            equip_quality_4: "Epic",
+            equip_quality_5: "Legendary",
+            equip_level_alter: "LvlAlter",
             // Trait名
             trait_28: "Explorer", trait_33: "Kindly Face", trait_34: "Lithe", trait_35: "Farsighted", trait_36: "Silver Tongue", 
             trait_37: "Quick Learner", trait_38: "Son of Stone", trait_39: "Unchained Beast", trait_69: "Conceited", trait_70: "Beautiful", 
@@ -396,6 +456,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const traitElements = traitsList.querySelectorAll('input, button');
         traitElements.forEach(el => el.disabled = !enabled);
         addTraitButton.disabled = !enabled;
+        
+        // equipsListは動的に再生成されるため、都度取得する
+        const currentEquipsList = document.getElementById('equips-list');
+        if (!currentEquipsList) return;
+
+        const equipElements = currentEquipsList.querySelectorAll('input, select, button');
+        equipElements.forEach(el => el.disabled = !enabled);
+
 
         // UMAセクションのボタンと、動的に生成されるフォーム内の要素を制御
         savePresetButton.disabled = !enabled;
@@ -413,19 +481,25 @@ document.addEventListener('DOMContentLoaded', () => {
         // 静的テキストの更新
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
+
+            // 子要素を持つラベルは、テキストノードだけを更新する
+            if (key === 'filter_npc_list_label') {
+                el.childNodes[0].nodeValue = i18n[currentLang][key];
+                return; // この要素の処理は完了
+            }
             // load_preset_button_label は子要素を持つため、中身を直接書き換えない
-            // filter_npc_list_label も同様
-            if (key === 'load_preset_button_label' || key === 'filter_npc_list_label') {
+            if (key === 'load_preset_button_label') {
                 return;
             }
-
-            if (i18n[currentLang][key]) {
+            
+            if (i18n[currentLang].hasOwnProperty(key)) {
                 // HTMLタグを含むキーはinnerHTML、それ以外はtextContentで更新
                 if (key === 'important_bug_report' || key === 'load_instruction') {
                     el.innerHTML = i18n[currentLang][key];
                 } else {
                     el.textContent = i18n[currentLang][key];
                 }
+
             }
         });
         document.querySelector('label[for="npcSelector"]').textContent = i18n[currentLang].npc_select_label;
@@ -483,6 +557,62 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (removeBtn) removeBtn.textContent = i18n[currentLang].trait_delete;
         });
+
+        // 装備品セクションの更新
+        const equipsContainer = document.getElementById('equips-editor-container');
+        if (equipsContainer) {
+            // セクションタイトル
+            const sectionLabel = equipsContainer.querySelector('.section-label');
+            if (sectionLabel) sectionLabel.textContent = i18n[currentLang].equips_label;
+
+            // 各スロット
+            equipsContainer.querySelectorAll('.equip-item').forEach((item, index) => {
+                const header = item.querySelector('.equip-slot-header');
+                if (header) {
+                    header.querySelector('.equip-slot-name').textContent = i18n[currentLang][`equip_slot_${index}`] || `Slot ${index}`;
+                    const idDisplay = header.querySelector('.equip-id-display');
+                    if (idDisplay && idDisplay.textContent !== '') {
+                        idDisplay.textContent = i18n[currentLang].equip_not_equipped;
+                    }
+                }
+                // 詳細項目ラベル
+                item.querySelectorAll('.equip-field-item').forEach(fieldItem => {
+                    const input = fieldItem.querySelector('[data-key]');
+                    const label = fieldItem.querySelector('label');
+                    if (input && label) {
+                        const key = input.dataset.key;
+                        const labelKey = `equip_${key}`;
+                        if (label) label.textContent = i18n[currentLang][labelKey] || key.charAt(0).toUpperCase() + key.slice(1);
+
+                        if (key === 'quality' && input.tagName === 'SELECT') {
+                            Array.from(input.options).forEach(opt => {
+                                const qualityKey = `equip_quality_${opt.value}`;
+                                if (i18n[currentLang][qualityKey]) {
+                                    opt.textContent = i18n[currentLang][qualityKey];
+                                } else if (!opt.dataset.unknown) { // 不明オプションは書き換えない
+                                    opt.textContent = `${i18n[currentLang].unknown_option} (${opt.value})`;
+                                }
+                            });
+                        }
+                    }
+                });
+                // 付属効果のタイトルやボタンも更新
+                if (item.querySelector('.add-attrs-container h4')) item.querySelector('.add-attrs-container h4').textContent = i18n[currentLang].equip_add_attrs_title;
+                if (item.querySelector('.btn-add-attr')) item.querySelector('.btn-add-attr').textContent = i18n[currentLang].equip_add_attr;
+
+                // 付属効果の各行のラベルと削除ボタンを更新
+                item.querySelectorAll('.add-attr-item').forEach(attrItem => {
+                    const typeLabel = attrItem.querySelector('label:nth-of-type(1)');
+                    if (typeLabel) typeLabel.textContent = i18n[currentLang].equip_attr_type;
+                    
+                    const levelAlterLabel = attrItem.querySelector('label:nth-of-type(3)'); // "Value"は固定なので3番目のラベル
+                    if (levelAlterLabel) levelAlterLabel.textContent = i18n[currentLang].equip_level_alter;
+
+                    const deleteBtn = attrItem.querySelector('.btn-delete');
+                    if (deleteBtn) deleteBtn.textContent = i18n[currentLang].trait_delete;
+                });
+            });
+        }
     }
 
     // Traitのデータリストを更新する関数
@@ -631,6 +761,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateIndividualInputs(selectedNpc);
             updateTraitsInputs(selectedNpc); // Traitsフォームを更新
             updateUmaInputs(selectedNpc); // UMAフォームも更新
+            updateEquipsInputs(selectedNpc); // 装備品フォームを更新
             isUpdatingFromJson = false; // フラグを下ろす
         }
     }
@@ -756,6 +887,170 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 初期表示
         updateNameLabel(value);
+    }
+
+    // ===== 装備品UIを生成/更新する関数 =====
+    function updateEquipsInputs(npcData) {
+        equipsEditorContainer.innerHTML = ''; // コンテナの中身を一度にクリア
+
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.innerHTML = `<span class="section-label" data-i18n="equips_label">${i18n[currentLang].equips_label}</span>`;
+        details.appendChild(summary);
+
+        const listContainer = document.createElement('div');
+        listContainer.id = 'equips-list';
+        details.appendChild(listContainer);
+        equipsEditorContainer.appendChild(details);
+
+        const equips = npcData.equips || [];
+
+        for (let i = 0; i < 10; i++) {
+            const equip = equips[i];
+            const slotContainer = document.createElement('div');
+            slotContainer.className = 'equip-item';
+
+            const header = document.createElement('div');
+            header.className = 'equip-slot-header';
+            const slotName = i18n[currentLang][`equip_slot_${i}`] || `Slot ${i}`;
+            header.innerHTML = `<span class="equip-slot-name">${slotName}</span> <span class="equip-id-display">${equip ? '' : i18n[currentLang].equip_not_equipped}</span>`;
+            slotContainer.appendChild(header);
+
+            if (equip) {
+                const fieldsContainer = document.createElement('div');
+                fieldsContainer.className = 'equip-fields';
+
+                // ID, Quality, Durability
+                ['id', 'subSlotIndex', 'stackNum', 'isStolen', 'quality', 'durability', 'isNew'].forEach(key => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'equip-field-item';
+                    const label = document.createElement('label');
+                    const labelKey = `equip_${key}`;
+                    label.textContent = i18n[currentLang][labelKey] || key.charAt(0).toUpperCase() + key.slice(1);
+                    
+                    let input;
+                    if (key === 'isNew') {
+                        input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.checked = equip[key];
+                        input.style.width = 'auto';
+                        input.classList.add('large-checkbox');
+                    } else if (key === 'quality') {
+                        input = document.createElement('select');
+                        for (let i = 1; i <= 5; i++) {
+                            const option = document.createElement('option');
+                            option.value = i;
+                            option.textContent = i18n[currentLang][`equip_quality_${i}`];
+                            input.appendChild(option);
+                        }
+                        // 現在の値が1-5の範囲外なら「不明」オプションを追加
+                        const currentValue = equip[key];
+                        if (currentValue !== null && currentValue !== undefined && (currentValue < 1 || currentValue > 5)) {
+                            const unknownOption = document.createElement('option');
+                            unknownOption.value = currentValue;
+                            unknownOption.textContent = `${i18n[currentLang].unknown_option} (${currentValue})`;
+                            unknownOption.dataset.unknown = "true";
+                            input.appendChild(unknownOption);
+                        }
+                        input.value = currentValue;
+                    } else {
+                        input = document.createElement('input');
+                        input.type = 'number';
+                        if (key === 'durability') input.step = 'any';
+                        input.value = equip[key] ?? null;
+                    }
+
+                    input.dataset.key = key;
+                    input.addEventListener('input', updateJsonEditorFromInputs);
+                    itemDiv.appendChild(label);
+                    itemDiv.appendChild(input);
+                    fieldsContainer.appendChild(itemDiv);
+                });
+
+                // AddAttrs
+                const addAttrsContainer = document.createElement('div');
+                addAttrsContainer.className = 'add-attrs-container';
+                const addAttrsTitle = document.createElement('h4');
+                addAttrsTitle.textContent = i18n[currentLang].equip_add_attrs_title;
+                addAttrsContainer.appendChild(addAttrsTitle);
+
+                const addAttrsList = document.createElement('div');
+                addAttrsList.className = 'add-attrs-list';
+                addAttrsContainer.appendChild(addAttrsList);
+
+                (equip.addAttrs || []).forEach((attr, attrIndex) => {
+                    createAddAttrInput(addAttrsList, attr, i, attrIndex);
+                });
+
+                const addAttrButton = document.createElement('button');
+                addAttrButton.textContent = i18n[currentLang].equip_add_attr;
+                addAttrButton.type = 'button';
+                addAttrButton.className = 'btn-add-attr';
+                addAttrButton.onclick = () => {
+                    if ((equip.addAttrs || []).length < 10) {
+                        const newAttr = { type: 0, value: 0, levelAlter: 0 };
+                        if (!equip.addAttrs) equip.addAttrs = [];
+                        equip.addAttrs.push(newAttr);
+                        createAddAttrInput(addAttrsList, newAttr, i, equip.addAttrs.length - 1);
+                        updateJsonEditorFromInputs();
+                    }
+                };
+                addAttrsContainer.appendChild(addAttrButton);
+
+                fieldsContainer.appendChild(addAttrsContainer);
+                slotContainer.appendChild(fieldsContainer);
+            }
+
+            listContainer.appendChild(slotContainer);
+        }
+    }
+
+    function createAddAttrInput(parent, attr, slotIndex, attrIndex) {
+        const item = document.createElement('div');
+        item.className = 'add-attr-item';
+
+        // Type
+        const typeLabel = document.createElement('label');
+        typeLabel.textContent = i18n[currentLang].equip_attr_type;
+        const typeInput = document.createElement('input');
+        typeInput.type = 'number';
+        typeInput.value = attr.type;
+        typeInput.dataset.key = 'type';
+        typeInput.addEventListener('input', updateJsonEditorFromInputs);
+
+        // Value
+        const valueLabel = document.createElement('label');
+        valueLabel.textContent = 'Value';
+        const valueInput = document.createElement('input');
+        valueInput.type = 'number';
+        valueInput.step = 'any'; // 小数点を許可
+        valueInput.value = attr.value;
+        valueInput.dataset.key = 'value';
+        valueInput.addEventListener('input', updateJsonEditorFromInputs);
+
+        // LevelAlter
+        const levelAlterLabel = document.createElement('label');
+        levelAlterLabel.textContent = i18n[currentLang].equip_level_alter;
+        const levelAlterInput = document.createElement('input');
+        levelAlterInput.type = 'number';
+        levelAlterInput.value = attr.levelAlter;
+        levelAlterInput.dataset.key = 'levelAlter';
+        levelAlterInput.addEventListener('input', updateJsonEditorFromInputs);
+
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = i18n[currentLang].trait_delete;
+        removeBtn.type = 'button';
+        removeBtn.className = 'btn-delete';
+        removeBtn.onclick = () => {
+            item.remove();
+            // 削除操作も即座にJSONに反映
+            // 装備品セクションが開いている前提でupdateJsonEditorFromInputsを呼ぶ
+            updateJsonEditorFromInputs(); 
+        };
+
+        item.append(typeLabel, typeInput, valueLabel, valueInput, levelAlterLabel, levelAlterInput, removeBtn);
+        parent.appendChild(item);
     }
 
     // ===== UMAレシピから個別UIに値をセットする関数 =====
@@ -1036,6 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // JSONエディタからUMAフォームへの反映も行う
             updateUmaInputs(currentNpcData);
             updateTraitsInputs(currentNpcData); // Traitsも更新
+            updateEquipsInputs(currentNpcData); // 装備品も更新
             isUpdatingFromJson = false;
         } catch (e) {
             console.error("Error updating individual inputs from JSON:", e);
@@ -1117,6 +1413,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             currentNpcData.traits = newTraits;
+
+            // 装備品の値を収集して更新
+            const newEquips = [];
+            for (let i = 0; i < 10; i++) {
+                const listContainer = document.getElementById('equips-list');
+                if (!listContainer) continue;
+                const slotContainer = listContainer.querySelector(`.equip-item:nth-child(${i + 1})`);
+                if (!slotContainer || !slotContainer.querySelector('.equip-fields')) {
+                    newEquips.push(null);
+                    continue;
+                }
+
+                const equipData = {};
+                // ★★★ 非常に重要: slotIndexを必ず設定する ★★★
+                equipData.slotIndex = i;
+
+                const fields = slotContainer.querySelectorAll('.equip-fields [data-key]');
+                let hasId = false;
+                fields.forEach(input => {
+                    const key = input.dataset.key;
+                    let value;
+                    if (input.type === 'checkbox') {
+                        value = input.checked;
+                    } else {
+                        const numValue = (input.tagName === 'SELECT') ? parseInt(input.value, 10) : parseFloat(input.value);
+                        value = isNaN(numValue) ? null : numValue;
+                    }
+
+                    equipData[key] = value;
+
+                    if (key === 'id' && !isNaN(value) && value > 0) {
+                        hasId = true;
+                    }
+                });
+
+                if (!hasId) { // IDが0や未入力なら装備なしとみなす
+                    newEquips.push(null);
+                    continue;
+                }
+
+                const addAttrs = [];
+                const attrItems = slotContainer.querySelectorAll('.add-attr-item');
+                attrItems.forEach(item => {
+                    const typeInput = item.querySelector('input[data-key="type"]');
+                    const valueInput = item.querySelector('input[data-key="value"]');
+                    const levelAlterInput = item.querySelector('input[data-key="levelAlter"]');
+                    if (typeInput && valueInput && levelAlterInput) {
+                        addAttrs.push({
+                            type: parseInt(typeInput.value) || 0,
+                            value: parseFloat(valueInput.value) || 0,
+                            levelAlter: parseInt(levelAlterInput.value) || 0
+                        });
+                    }
+                });
+                equipData.addAttrs = addAttrs;
+                newEquips.push(equipData);
+            }
+            currentNpcData.equips = newEquips;
 
             // 外見データ(umaRecipe)が変更されたかチェックし、変更されていればportraitをnullにする
             const originalUmaRecipe = currentNpcOriginalData ? currentNpcOriginalData.umaRecipe : null;

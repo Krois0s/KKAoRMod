@@ -2,7 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>Age of Reforging キャラクターエディタ</title>
+    <title>Age of Reforging Character Editor</title>
+    <meta name="referrer" content="strict-origin-when-cross-origin">    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://www.google-analytics.com;">
     <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-08N0JCQFPV"></script>
 <script>
@@ -84,6 +85,7 @@
             margin: 0 8px;
         }
         /* Traits編集フォームのレイアウト */
+        #equips-editor-container,
         #traits-editor-container {
             padding: 20px;
             border: 1px solid #e0e0e0;
@@ -116,17 +118,18 @@
         /* チェックボックスのサイズを大きくする */
         .large-checkbox {
             transform: scale(1.5);
+            position: relative;
+            top: 5px; /* 垂直位置を微調整 */
             /* 他の入力欄と同じ右寄せにするための調整 */
             /* width: 120px; */ /* 中央寄せのため幅は自動に */
-            /* justify-self: end; */
-            margin: 0 auto; /* 中央寄せにする */
+            margin-right: 5px; /* 右端から少し左に寄せる */
         }
 
         /* Trait削除ボタン用のコンパクトなスタイル */
         .btn-delete {
             padding: 4px 8px;
             font-size: 12px;
-            margin: 0 0 0 10px; /* 上下のマージンをなくし、左のマージンだけにする */
+            margin: 0; /* マージンをリセット */
             background-color: #dc3545; /* 削除を示す赤色 */
             flex-shrink: 0; /* ボタンが縮まないようにする */
         }
@@ -221,6 +224,82 @@
         }
         details:not([open]) > summary {
             padding: 5px 10px;
+        }
+
+        /* 装備品UIのスタイル (新レイアウト) */
+        #equips-list {
+            display: grid;
+            /* 画面幅に応じて1列または2列に自動で切り替わるグリッドレイアウト */
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 10px;
+        }
+        .equip-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+        .equip-slot-header {
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+        .equip-slot-header .equip-id-display {
+            color: #555;
+            font-weight: normal;
+        }
+        .equip-fields {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .equip-field-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .equip-field-item label {
+            font-weight: normal;
+            font-size: 14px;
+            margin-top: 0;
+        }
+        .equip-field-item input,
+        .equip-field-item select {
+            width: 120px; /* 他のセクションの入力欄と幅を統一 */
+        }
+        .add-attrs-container h4 {
+            margin: 15px 0 5px 0;
+            font-size: 1em;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .add-attr-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        .add-attr-item label {
+            font-size: 12px;
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+        .add-attr-item input {
+            width: 70px;
+            /* flex-grow: 1; */ /* 削除ボタンが右に寄りすぎるため削除 */
+        }
+        .add-attr-item .btn-delete {
+            /* 最後の入力欄とボタンの間にスペースを設ける */
+            margin-left: auto;
+        }
+        .btn-add-attr {
+            padding: 2px 8px;
+            font-size: 12px;
+            margin-top: 5px;
         }
 
         /* ドラッグ＆ドロップ用オーバーレイ */
@@ -323,6 +402,12 @@
                 <div id="uma-editor-form">
                     <!-- JSによって動的にコンテンツが生成される -->
                 </div>
+            </div>
+
+            <!-- ▼▼▼ 装備品編集UI ▼▼▼ -->
+            <div id="equips-editor-container">
+                <label class="section-label" data-i18n="equips_label">装備品</label>
+                <div id="equips-list"></div>
             </div>
 
             <!-- ▼▼▼ データ読み込み後に表示されるUI ▼▼▼ -->
