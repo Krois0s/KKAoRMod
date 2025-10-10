@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let traitData = null; // traits.jsonから読み込んだデータを保持
     let traitDatalist; // Trait選択候補の<datalist>要素
+    let itemData = null; // items.jsonから読み込んだデータを保持
+    let itemDatalist; // アイテム選択候補の<datalist>要素
     // ★★★ 多言語対応リソース ★★★
     const i18n = {
         ja: {
@@ -477,6 +479,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return i18n[currentLang].unknown_option;
     }
 
+    // ===== アイテム名を取得するヘルパー関数 =====
+    function getItemName(itemId, lang) {
+        if (itemData && itemData[itemId]) {
+            // 指定言語の名称があればそれを、なければ英語、それもなければ不明を返す
+            return itemData[itemId][lang] || itemData[itemId]['en'] || i18n[currentLang].unknown_option;
+        }
+        return i18n[currentLang].unknown_option;
+    }
+
 
     // ===== 言語切り替え関連 =====
     function setLanguage(lang) {
@@ -515,6 +526,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Traitのデータリストを更新
         updateTraitDatalist();
+
+        // アイテムのデータリストを更新
+        updateItemDatalist();
     }
 
     // フォームの値を維持したまま、ラベル等の言語のみを更新する関数
@@ -641,10 +655,14 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initializeApp() {
         try {
             const response = await fetch('traits.json');
-            traitData = await response.json();
+            const itemResponse = await fetch('items.json');
+            [traitData, itemData] = await Promise.all([
+                response.json(),
+                itemResponse.json()
+            ]);
         } catch (error) {
-            console.error('Failed to load traits.json:', error);
-            alert('Trait定義ファイル(traits.json)の読み込みに失敗しました。');
+            console.error('Failed to load data files:', error);
+            alert('定義ファイル(traits.json/items.json)の読み込みに失敗しました。');
         }
         // 初期言語を設定 (ブラウザの言語が日本語なら日本語、それ以外は英語)
         setLanguage(navigator.language.startsWith('ja') ? 'ja' : 'en');
@@ -659,6 +677,11 @@ document.addEventListener('DOMContentLoaded', () => {
     traitDatalist = document.createElement('datalist');
     traitDatalist.id = 'traitDatalist';
     document.body.appendChild(traitDatalist);
+    // アイテム用のdatalistを生成してbodyに追加
+    itemDatalist = document.createElement('datalist');
+    itemDatalist.id = 'itemDatalist';
+    document.body.appendChild(itemDatalist);
+
     // 非同期で初期化処理を実行
     initializeApp();
 
@@ -925,7 +948,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const header = document.createElement('div');
             header.className = 'equip-slot-header';
             const slotName = i18n[currentLang][`equip_slot_${i}`] || `Slot ${i}`;
-            header.innerHTML = `<span class="equip-slot-name">${slotName}</span> <span class="equip-id-display">${equip ? '' : i18n[currentLang].equip_not_equipped}</span>`;
+            const itemNameText = equip ? getItemName(equip.id, currentLang) : i18n[currentLang].equip_not_equipped;
+            const idText = equip ? `(ID: ${equip.id})` : '';
+
+            header.innerHTML = `<span class="equip-slot-name">${slotName}</span> <span class="equip-id-display">${itemNameText} ${idText}</span>`;
             slotContainer.appendChild(header);
 
             if (equip) {
@@ -969,6 +995,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         input = document.createElement('input');
                         input.type = 'number';
                         if (key === 'durability') input.step = 'any';
+                        if (key === 'id') {
+                            input.setAttribute('list', 'itemDatalist');
+                            input.addEventListener('input', (e) => {
+                                const newId = e.target.value;
+                                const newName = getItemName(newId, currentLang);
+                                const idText = newId ? `(ID: ${newId})` : '';
+                                header.querySelector('.equip-id-display').textContent = `${newName} ${idText}`;
+                            });
+                        }
                         input.value = equip[key] ?? null;
                     }
 
