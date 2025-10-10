@@ -576,60 +576,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (removeBtn) removeBtn.textContent = i18n[currentLang].trait_delete;
         });
 
-        // 装備品セクションの更新
-        const equipsContainer = document.getElementById('equips-editor-container');
-        if (equipsContainer) {
-            // セクションタイトル
-            const sectionLabel = equipsContainer.querySelector('.section-label');
-            if (sectionLabel) sectionLabel.textContent = i18n[currentLang].equips_label;
-
-            // 各スロット
-            equipsContainer.querySelectorAll('.equip-item').forEach((item, index) => {
-                const header = item.querySelector('.equip-slot-header');
-                if (header) {
-                    header.querySelector('.equip-slot-name').textContent = i18n[currentLang][`equip_slot_${index}`] || `Slot ${index}`;
-                    const idDisplay = header.querySelector('.equip-id-display');
-                    if (idDisplay && idDisplay.textContent !== '') {
-                        idDisplay.textContent = i18n[currentLang].equip_not_equipped;
-                    }
-                }
-                // 詳細項目ラベル
-                item.querySelectorAll('.equip-field-item').forEach(fieldItem => {
-                    const input = fieldItem.querySelector('[data-key]');
-                    const label = fieldItem.querySelector('label');
-                    if (input && label) {
-                        const key = input.dataset.key;
-                        const labelKey = `equip_${key}`;
-                        if (label) label.textContent = i18n[currentLang][labelKey] || key.charAt(0).toUpperCase() + key.slice(1);
-
-                        if (key === 'quality' && input.tagName === 'SELECT') {
-                            Array.from(input.options).forEach(opt => {
-                                const qualityKey = `equip_quality_${opt.value}`;
-                                if (i18n[currentLang][qualityKey]) {
-                                    opt.textContent = i18n[currentLang][qualityKey];
-                                } else if (!opt.dataset.unknown) { // 不明オプションは書き換えない
-                                    opt.textContent = `${i18n[currentLang].unknown_option} (${opt.value})`;
-                                }
-                            });
-                        }
-                    }
-                });
-                // 付属効果のタイトルやボタンも更新
-                if (item.querySelector('.add-attrs-container h4')) item.querySelector('.add-attrs-container h4').textContent = i18n[currentLang].equip_add_attrs_title;
-                if (item.querySelector('.btn-add-attr')) item.querySelector('.btn-add-attr').textContent = i18n[currentLang].equip_add_attr;
-
-                // 付属効果の各行のラベルと削除ボタンを更新
-                item.querySelectorAll('.add-attr-item').forEach(attrItem => {
-                    const typeLabel = attrItem.querySelector('label:nth-of-type(1)');
-                    if (typeLabel) typeLabel.textContent = i18n[currentLang].equip_attr_type;
-                    
-                    const levelAlterLabel = attrItem.querySelector('label:nth-of-type(3)'); // "Value"は固定なので3番目のラベル
-                    if (levelAlterLabel) levelAlterLabel.textContent = i18n[currentLang].equip_level_alter;
-
-                    const deleteBtn = attrItem.querySelector('.btn-delete');
-                    if (deleteBtn) deleteBtn.textContent = i18n[currentLang].trait_delete;
-                });
-            });
+        // 装備品UIを再構築して言語を反映
+        if (fullSaveData && currentNpcIndex !== null) {
+            const currentNpcData = fullSaveData.npcs[currentNpcIndex];
+            updateEquipsInputs(currentNpcData);
         }
     }
 
