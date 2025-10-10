@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isUpdatingFromJson = false; // JSONエディタからの更新中フラグ
     let currentLang = 'ja'; // 現在の言語
 
+    let traitData = null; // traits.jsonから読み込んだデータを保持
     let traitDatalist; // Trait選択候補の<datalist>要素
     // ★★★ 多言語対応リソース ★★★
     const i18n = {
@@ -148,13 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
             equip_quality_4: "エピック",
             equip_quality_5: "レジェンダリー",
             equip_level_alter: "LvlAlter",
-            // Trait名
-            trait_28: "探検家", trait_33: "善意の顔", trait_34: "しなやか", trait_35: "遠視", trait_36: "おしゃべり上手", trait_37: "利発", 
-            trait_38: "岩石の子", trait_39: "決死", trait_69: "自惚れ", trait_70: "美貌", trait_73: "近視", trait_74: "どっしり", 
-            trait_75: "軟弱", trait_76: "残酷な", trait_77: "短気", trait_85: "熱心", trait_87: "弱者いじめ", trait_228: "戦場の医者",
-            trait_229:"せっかち", trait_230: "辛抱強い", trait_231: "チームワーク", trait_232: "生まれつきの料理人", trait_235: "決定的",
-            trait_236: "愚直", trait_238: "優秀な見張り", trait_242: "優柔不断", trait_243: "不屈の", trait_245: "柔軟性", trait_247: "幸運",
-            trait_248: "マゾヒスト", trait_249: "機会主義者", trait_250: "過度な慎重", trait_259: "不運", trait_309: "斬撃専心", trait_352: "鍛造習得",
             // アラートメッセージ
             alert_file_type_error: '対応しているファイルは .dat です。',
             alert_file_read_error: 'ファイルの読み込みに失敗しました。',
@@ -276,14 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
             equip_quality_4: "Epic",
             equip_quality_5: "Legendary",
             equip_level_alter: "LvlAlter",
-            // Trait名
-            trait_28: "Explorer", trait_33: "Kindly Face", trait_34: "Lithe", trait_35: "Farsighted", trait_36: "Silver Tongue", 
-            trait_37: "Quick Learner", trait_38: "Son of Stone", trait_39: "Unchained Beast", trait_69: "Conceited", trait_70: "Beautiful", 
-            trait_73: "Shortsighted", trait_74: "Stocky", trait_75: "Flabby", trait_76: "Cruel", trait_77: "Impulsive",
-            trait_85: "Diligent", trait_87: "Bully", trait_228: "Battlefield Doctor", trait_229:"Impatient", trait_230: "Patient",
-            trait_231: "Team Spirit", trait_232: "Inborn Cook", trait_235: "Decisive", trait_236: "Pragmatic", trait_238: "Excellent Sentinel",
-            trait_242: "Indecisive", trait_243: "Indomitable", trait_245: "Flexible", trait_247: "Lucky", trait_248: "Masochist",
-            trait_249: "Opportunist", trait_250: "Overcautious", trait_259: "Unlucky", trait_309: "Sharp Blade Mastery", trait_352: "Learned Forging",
             // アラートメッセージ
             alert_file_type_error: 'Only .dat files are supported.',
             alert_file_read_error: 'Failed to read the file.',
@@ -458,8 +444,17 @@ document.addEventListener('DOMContentLoaded', () => {
         addTraitButton.disabled = !enabled;
         
         // equipsListは動的に再生成されるため、都度取得する
-        const currentEquipsList = document.getElementById('equips-list');
-        if (!currentEquipsList) return;
+        const equipsContainer = document.getElementById('equips-editor-container');
+        if (!equipsContainer) return;
+
+        // detailsタグの状態（開いているか閉じているか）を考慮する
+        const details = equipsContainer.querySelector('details');
+        if (details) {
+            const summary = details.querySelector('summary');
+            if (summary) summary.style.pointerEvents = enabled ? 'auto' : 'none';
+        }
+
+        const currentEquipsList = equipsContainer.querySelector('#equips-list');
 
         const equipElements = currentEquipsList.querySelectorAll('input, select, button');
         equipElements.forEach(el => el.disabled = !enabled);
@@ -472,6 +467,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const umaFormElements = umaEditorForm.querySelectorAll('input, button');
         umaFormElements.forEach(el => el.disabled = !enabled);
     }
+
+    // ===== Trait名を取得するヘルパー関数 =====
+    function getTraitName(traitId, lang) {
+        if (traitData && traitData[traitId]) {
+            // 指定言語の名称があればそれを、なければ英語、それもなければ不明を返す
+            return traitData[traitId][lang] || traitData[traitId]['en'] || i18n[currentLang].unknown_option;
+        }
+        return i18n[currentLang].unknown_option;
+    }
+
 
     // ===== 言語切り替え関連 =====
     function setLanguage(lang) {
@@ -549,8 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const removeBtn = nameLabel.nextElementSibling;
             if (nameLabel) {
                 if (input.value) {
-                    const traitName = i18n[currentLang][`trait_${input.value}`];
-                    nameLabel.textContent = traitName || i18n[currentLang].unknown_option;
+                    nameLabel.textContent = getTraitName(input.value, currentLang);
                 } else {
                     nameLabel.textContent = '';
                 }
@@ -619,24 +623,33 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateTraitDatalist() {
         if (!traitDatalist) return;
 
-        traitDatalist.innerHTML = ''; // 中身をクリア
-        const traitKeys = Object.keys(i18n[currentLang]).filter(key => key.startsWith('trait_') && key !== 'trait_placeholder' && key !== 'trait_delete');
-        
-        traitKeys.forEach(key => {
-            const traitId = key.split('_')[1];
-            const traitName = i18n[currentLang][key];
+        traitDatalist.innerHTML = ''; // 中身をクリア        
+        if (!traitData) return;
+
+        Object.keys(traitData).forEach(traitId => {
+            const traitName = getTraitName(traitId, currentLang);
             const option = document.createElement('option');
-            // value属性に実際の値（ID）を設定します。
-            // これにより、項目選択時に正しいIDが入力されます。
             option.value = traitId;
-            // ドロップダウンに表示されるテキスト（候補）を設定します。
             option.textContent = `${traitId} : ${traitName}`;
             traitDatalist.appendChild(option);
         });
     }
     langJaButton.addEventListener('click', () => setLanguage('ja'));
     langEnButton.addEventListener('click', () => setLanguage('en'));
-
+    
+    // ===== アプリケーション初期化処理 =====
+    async function initializeApp() {
+        try {
+            const response = await fetch('traits.json');
+            traitData = await response.json();
+        } catch (error) {
+            console.error('Failed to load traits.json:', error);
+            alert('Trait定義ファイル(traits.json)の読み込みに失敗しました。');
+        }
+        // 初期言語を設定 (ブラウザの言語が日本語なら日本語、それ以外は英語)
+        setLanguage(navigator.language.startsWith('ja') ? 'ja' : 'en');
+    }
+    
     // 最初にフォームの骨格を生成
     createIndividualForm();
     // 初期状態ではフォームを無効化しておく
@@ -646,8 +659,8 @@ document.addEventListener('DOMContentLoaded', () => {
     traitDatalist = document.createElement('datalist');
     traitDatalist.id = 'traitDatalist';
     document.body.appendChild(traitDatalist);
-    // 初期言語を設定 (ブラウザの言語が日本語なら日本語、それ以外は英語)
-    setLanguage(navigator.language.startsWith('ja') ? 'ja' : 'en');
+    // 非同期で初期化処理を実行
+    initializeApp();
 
     // ===== ファイル選択時の処理 =====
     // ファイル選択ダイアログが開くたびにinputの値をリセットする
@@ -855,8 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const updateNameLabel = (id) => {
             if (id) {
-                const traitName = i18n[currentLang][`trait_${id}`];
-                nameLabel.textContent = traitName || i18n[currentLang].unknown_option;
+                nameLabel.textContent = getTraitName(id, currentLang);
             } else {
                 nameLabel.textContent = '';
             }
