@@ -1,0 +1,76 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- ターゲットフレームワーク：.NET Framework 4.7.2 を指定 -->
+    <TargetFramework>net472</TargetFramework>
+    <!-- 出力されるDLLファイルの名前 -->
+    <AssemblyName>KKCaravanCargoAccess</AssemblyName>
+    <!-- MODの名前（説明用） -->
+     <Description>A mod for accessing the caravan cargo in town.</Description>
+    <!-- バージョン番号 -->
+    <Version>1.0.0</Version>
+    <!-- unsafeコードの許可（Harmonyで必要になることがある） -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- C#の言語バージョン：Unityバージョンから推定される7.3を指定 -->
+    <LangVersion>9.0</LangVersion>
+    <OutputPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\BepInEx\plugins\$(AssemblyName)\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- BepInExの必須ライブラリ -->
+    <Reference Include="BepInEx">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    
+    <!-- Harmonyの必須ライブラリ -->
+    <Reference Include="0Harmony">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    
+    <!-- ゲーム本体のメインDLL -->
+    <Reference Include="Assembly-CSharp">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\Age of Reforging The Freelands_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    
+    <!-- Unityエンジンのコアライブラリ -->
+    <Reference Include="UnityEngine">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\Age of Reforging The Freelands_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\Age of Reforging The Freelands_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    
+    <!-- キー入力(Input)のために必要 -->
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\Age of Reforging The Freelands_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    
+    <!-- (もし必要なら) UI関連のライブラリ -->
+    <Reference Include="UnityEngine.UI">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\Age of Reforging The Freelands_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\Age of Reforging The Freelands_Data\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="warehouseicon">
+      <!-- このファイルを、ビルド時に出力ディレクトリにコピーします -->
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>

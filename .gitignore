@@ -1,3 +1,5 @@
 .coderabbit.yaml
-KKCharaEditor/top.png
-KKCharaEditor/pct.png
+*.png
+AoRCode
+bin
+obj
