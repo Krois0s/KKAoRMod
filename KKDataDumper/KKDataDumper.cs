@@ -13,7 +13,7 @@ internal static class ModInfo
 {
     internal const string Guid = "kk.aor.datadumper";
     internal const string Name = "KK Data Dumper";
-    internal const string Version = "1.0.0";
+    internal const string Version = "1.1.0";
 }
 
 [BepInPlugin(ModInfo.Guid, ModInfo.Name, ModInfo.Version)]
@@ -160,7 +160,7 @@ public class KKDataDumper : BaseUnityPlugin
         }
 
         var csv = new StringBuilder();
-        csv.AppendLine("SourceList,AttributeType,Value,LevelAlter");
+        csv.AppendLine("SourceList,AttributeID,AttributeType,Value,LevelAlter");
 
         var listsToDump = new[]
         {
@@ -175,7 +175,7 @@ public class KKDataDumper : BaseUnityPlugin
             if (attributeList == null) continue;
             foreach (var attr in attributeList)
             {
-                var line = string.Format("\"{0}\",{1},{2},{3}", sourceName, attr.type, attr.value, attr.levelAlter);
+                var line = string.Format("\"{0}\",{1},{2},{3},{4}", sourceName,(int)attr.type, attr.type, attr.value, attr.levelAlter);
                 csv.AppendLine(line);
             }
         }
