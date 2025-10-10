@@ -160,7 +160,8 @@ public class KKDataDumper : BaseUnityPlugin
         }
 
         var csv = new StringBuilder();
-        csv.AppendLine("SourceList,AttributeID,AttributeType,Value,LevelAlter");
+        // ★★★ ヘッダーに "LocalizationKey" を追加 ★★★
+        csv.AppendLine("SourceList,AttributeID,AttributeType,LocalizationKey,Value,LevelAlter");
 
         var listsToDump = new[]
         {
@@ -175,14 +176,122 @@ public class KKDataDumper : BaseUnityPlugin
             if (attributeList == null) continue;
             foreach (var attr in attributeList)
             {
-                var line = string.Format("\"{0}\",{1},{2},{3},{4}", sourceName,(int)attr.type, attr.type, attr.value, attr.levelAlter);
+                // ★★★ 変換関数を呼び出して、正しいキーを取得 ★★★
+                string localizationKey = GetLocalizationKeyForAddon(attr.type);
+
+                var line = string.Format("\"{0}\",{1},{2},\"{3}\",{4},{5}",
+                    sourceName,
+                    (int)attr.type,
+                    attr.type,
+                    localizationKey, // ← 新しい列を追加
+                    attr.value,
+                    attr.levelAlter
+                );
                 csv.AppendLine(line);
             }
         }
 
         string filePath = Path.Combine(outputDirectory, "AddonAttribute_List.csv");
         File.WriteAllText(filePath, csv.ToString());
-        Log.LogInfo($"  -> Dumped AddonAttributes to {filePath}");
+        Log.LogInfo($"  -> Dumped AddonAttributes with Localization Keys to {filePath}");
+    }
+
+    // ★★★ UITalentInfo.CreateDescriptionのロジックを再現したヘルパー関数 ★★★
+    private string GetLocalizationKeyForAddon(AddonAttribute attr)
+    {
+        string enumName = attr.ToString();
+
+        // UITalentInfo.CreateDescription の switch文のロジックを完全に再現します
+        switch (attr)
+        {
+            // === グループ1：ハードコーディングされたキー ===
+            case AddonAttribute.Attack:                     return "Accuracy";
+            case AddonAttribute.Defence:                    return "Block Rate";
+            case AddonAttribute.Crit:                       return "Crit Rate";
+            case AddonAttribute.CritMultiple:               return "Crit Damage";
+            case AddonAttribute.HPrestore:                  return "HP restore";
+            case AddonAttribute.EPrestore:                  return "EP restore";
+            case AddonAttribute.MPrestore:                  return "MP restore";
+            case AddonAttribute.EPsave:                     return "EP Save";
+            case AddonAttribute.BlockEPsave:                return "BlockEP Save";
+            case AddonAttribute.CooldownReduce:             return "Cooldown Reduce";
+            case AddonAttribute.DamageIncrease:             return "Tooltip_Buff_DamageIncrease";
+            case AddonAttribute.DamageReduce:               return "Tooltip_Buff_DamageReduce";
+            case AddonAttribute.MeleeDamage:                return "Tooltip_Buff_MeleeDamage";
+            case AddonAttribute.RangeDamage:                return "Tooltip_Buff_RangeDamage";
+            case AddonAttribute.MagicDamage:                return "Tooltip_Buff_MagicDamage";
+            case AddonAttribute.StaminaDamage:              return "Tooltip_Buff_StaminaDamage";
+            case AddonAttribute.SummonDamageBonus:          return "Tooltip_Buff_SummonDamageBonus";
+            case AddonAttribute.SummonHealthBonus:          return "Tooltip_Buff_SummonHealthBonus";
+            case AddonAttribute.HPPercent:                  return "Tooltip_Buff_HPPercent";
+            case AddonAttribute.HealMD:                     return "Tooltip_Buff_HealMD";
+            case AddonAttribute.AttackSpeed:                return "Attack Speed";
+            case AddonAttribute.TimeSpeed:                  return "Time Speed";
+            case AddonAttribute.AttackRange:                return "Attack Range";
+            case AddonAttribute.AttackAngle:                return "Attack Angle";
+            case AddonAttribute.WeaponForce:                return "Weapon Force";
+            case AddonAttribute.BlockAngle:                 return "Block Angle";
+            case AddonAttribute.MoveSpeed:                  return "Move Speed";
+            case AddonAttribute.PDR:                        return "Tenacity";
+            case AddonAttribute.MDR:                        return "Volition";
+            case AddonAttribute.Threat:                     return "Threat";
+
+            // === グループ2：動的生成 (Damage Resistance) ===
+            case AddonAttribute.SharpDamageResistance:
+            case AddonAttribute.BluntDamageResistance:
+            case AddonAttribute.StabDamageResistance:
+            case AddonAttribute.FlameDamageResistance:
+            case AddonAttribute.ColdDamageResistance:
+            case AddonAttribute.ElectricDamageResistance:
+            case AddonAttribute.PoisonDamageResistance:
+            case AddonAttribute.PositiveDamageResistance:
+            case AddonAttribute.NegativeDamageResistance:
+                return ((DamageType)(attr - 100)).ToString() + " resistance";
+
+            // === グループ3：動的生成 (Resistance Penetration) ===
+            case AddonAttribute.SharpResistancePenetration:
+            case AddonAttribute.BluntResistancePenetration:
+            case AddonAttribute.StabResistancePenetration:
+            case AddonAttribute.FlameResistancePenetration:
+            case AddonAttribute.ColdResistancePenetration:
+            case AddonAttribute.ElectricResistancePenetration:
+            case AddonAttribute.PoisonResistancePenetration:
+            case AddonAttribute.PositiveResistancePenetration:
+            case AddonAttribute.NegativeResistancePenetration:
+                return ((DamageType)(attr - 200)).ToString() + " Penetration";
+
+            // === グループ4：動的生成 (種族ダメージ修飾子) ===
+            case AddonAttribute.HumanDamageModifier:
+            case AddonAttribute.ElfDamageModifier:
+            case AddonAttribute.DwarfDamageModifier:
+            case AddonAttribute.BrutemanDamageModifier:
+            case AddonAttribute.LizardDamageModifier:
+            case AddonAttribute.FairyDamageModifier:
+            case AddonAttribute.DemonDamageModifier:
+            case AddonAttribute.UndeadDamageModifier:
+            case AddonAttribute.OrcDamageModifier:
+            case AddonAttribute.MythologicalDamageModifier:
+            case AddonAttribute.AnimalDamageModifier:
+            case AddonAttribute.InsectDamageModifier:
+                return "Tooltip_Buff_" + enumName.Replace("Modifier", "");
+            
+            // === グループ5：動的生成 (魔法ダメージ修飾子) ===
+            case AddonAttribute.SharpSpellDamageModifier:
+            case AddonAttribute.BluntSpellDamageModifier:
+            case AddonAttribute.StabSpellDamageModifier:
+            case AddonAttribute.FlameSpellDamageModifier:
+            case AddonAttribute.ColdSpellDamageModifier:
+            case AddonAttribute.ElectricSpellDamageModifier:
+            case AddonAttribute.PoisonSpellDamageModifier:
+            case AddonAttribute.PositiveSpellDamageModifier:
+            case AddonAttribute.NegativeSpellDamageModifier:
+                return ((DamageType)(attr - 400)).ToString() + " bonus";
+
+            // === デフォルト：enum名がそのままキーになるケース ===
+            // (Strength, Endurance, HP, EP, MP, Persuade など)
+            default:
+                return enumName;
+        }
     }
 
     private void DumpSpells(string outputDirectory)
