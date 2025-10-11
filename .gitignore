@@ -1,5 +1,6 @@
 .coderabbit.yaml
 *.png
-AoRCode
-bin
-obj
+AoRCode/
+bin/
+obj/
+workshop/

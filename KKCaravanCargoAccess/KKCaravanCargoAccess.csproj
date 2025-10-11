@@ -8,7 +8,7 @@
     <!-- MODの名前（説明用） -->
      <Description>A mod for accessing the caravan cargo in town.</Description>
     <!-- バージョン番号 -->
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <!-- unsafeコードの許可（Harmonyで必要になることがある） -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- C#の言語バージョン：Unityバージョンから推定される7.3を指定 -->
