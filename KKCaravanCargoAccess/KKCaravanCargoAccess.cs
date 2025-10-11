@@ -10,7 +10,7 @@ internal static class ModInfo
 {
     internal const string Guid = "kk.aor.caravancargoaccess";
     internal const string Name = "KK Caravan Cargo Access";
-    internal const string Version = "1.0.0";
+    internal const string Version = "1.0.1";
 }
 
 [BepInPlugin(ModInfo.Guid, ModInfo.Name, ModInfo.Version)]
@@ -93,39 +93,31 @@ public class KKCaravanCargoAccess : BaseUnityPlugin
     {
         if (myCaravanButton != null)
         {
+            // ★★★ 解放済みチェックを追加 ★★★
+            bool caravanUnlocked = CaravanUIManager.Instance != null && CaravanUIManager.Instance.HasCaravan;
 
             bool isTown = CityTownManager.instance != null;
             bool isWorldMap = WorldTravelManager.instance != null;
-        bool canBeVisible; // 変数名を canBeActive から canBeVisible に変更すると、より意図が明確になります
+            bool canBeVisible;
 
-        if (RestrictToTowns.Value == true)
-        {
-            // 「町に制限する」がONの場合 (デフォルト)
-            canBeVisible = isTown;
-        }
-        else
-        {
-            // 「町に制限する」がOFFの場合
-            canBeVisible = !isWorldMap;
-        }
+            if (RestrictToTowns.Value == true)
+            {
+                canBeVisible = isTown;
+            }
+            else
+            {
+                canBeVisible = !isWorldMap;
+            }
+            
+            bool isWarehouseOpen = WarehouseManager.instance != null && WarehouseManager.instance.opening;
 
-        // ----------------------------------------------------
-        // 次に、現在押せる状態かどうか（interactable）と、
-        // そもそも表示すべきかどうか（activeSelf）の両方を制御する
-        // ----------------------------------------------------
-        
-        bool isWarehouseOpen = WarehouseManager.instance != null && WarehouseManager.instance.opening;
+            // ★★★ 最終的な表示条件に「解放済み」を追加 ★★★
+            bool shouldBeActive = caravanUnlocked && canBeVisible && !isWarehouseOpen;
 
-        // ボタンが「押せる」のは、倉庫が開いていない時だけ
-        myCaravanButton.interactable = !isWarehouseOpen;
-
-        // ボタンが「表示される」のは、基本条件を満たし、かつ、他の倉庫が開いていない時
-        bool shouldBeActive = canBeVisible && !isWarehouseOpen;
-
-        if (myCaravanButton.gameObject.activeSelf != shouldBeActive)
-        {
-            myCaravanButton.gameObject.SetActive(shouldBeActive);
-        }
+            if (myCaravanButton.gameObject.activeSelf != shouldBeActive)
+            {
+                myCaravanButton.gameObject.SetActive(shouldBeActive);
+            }
         }
     }
 }
