@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKCaravanCargoAccess", "KKC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKNoNegativeTraits", "KKNoNegativeTraits\KKNoNegativeTraits.csproj", "{B77FAD12-5062-496C-88D7-9E7D523F32A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KKHotkeyDialogs", "KKHotkeyDialogs\KKHotkeyDialogs.csproj", "{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{B77FAD12-5062-496C-88D7-9E7D523F32A1}.Release|x64.Build.0 = Release|Any CPU
 		{B77FAD12-5062-496C-88D7-9E7D523F32A1}.Release|x86.ActiveCfg = Release|Any CPU
 		{B77FAD12-5062-496C-88D7-9E7D523F32A1}.Release|x86.Build.0 = Release|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Debug|x64.Build.0 = Debug|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Debug|x86.Build.0 = Debug|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Release|x64.ActiveCfg = Release|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Release|x64.Build.0 = Release|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Release|x86.ActiveCfg = Release|Any CPU
+		{EA05E0D8-C8A2-4621-8F3C-72CD97BB9B44}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
