@@ -289,14 +289,18 @@
             gap: 8px;
             margin-bottom: 5px;
         }
+        .add-attr-item select {
+            flex: 3; /* Type選択の幅を広めに取る */
+        }
         .add-attr-item label {
             font-size: 12px;
             font-weight: normal;
             margin-bottom: 0;
+            flex-shrink: 0; /* ラベルが縮まないように */
         }
         .add-attr-item input {
-            width: 70px;
-            /* flex-grow: 1; */ /* 削除ボタンが右に寄りすぎるため削除 */
+            width: 60px;
+            flex: 1;
         }
         .add-attr-item .btn-delete {
             /* 最後の入力欄とボタンの間にスペースを設ける */
