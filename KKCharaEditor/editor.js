@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let traitDatalist; // Trait選択候補の<datalist>要素
     let itemData = null; // items.jsonから読み込んだデータを保持
     let itemDatalist; // アイテム選択候補の<datalist>要素
+    let addonAttrData = null; // addon_attributes.jsonから読み込んだデータを保持
     // ★★★ 多言語対応リソース ★★★
     const i18n = {
         ja: {
@@ -488,6 +489,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return i18n[currentLang].unknown_option;
     }
 
+    // ===== 付属効果名を取得するヘルパー関数 =====
+    function getAddonAttrName(attrId, lang) {
+        if (addonAttrData && addonAttrData[attrId]) {
+            // 指定言語の名称があればそれを、なければ英語、それもなければ不明を返す
+            return addonAttrData[attrId][lang] || addonAttrData[attrId]['en'] || i18n[currentLang].unknown_option;
+        }
+        return i18n[currentLang].unknown_option;
+    }
+
 
     // ===== 言語切り替え関連 =====
     function setLanguage(lang) {
@@ -606,13 +616,15 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('traits.json');
             const itemResponse = await fetch('items.json');
-            [traitData, itemData] = await Promise.all([
+            const addonAttrResponse = await fetch('addon_attributes.json');
+            [traitData, itemData, addonAttrData] = await Promise.all([
                 response.json(),
-                itemResponse.json()
+                itemResponse.json(),
+                addonAttrResponse.json()
             ]);
         } catch (error) {
             console.error('Failed to load data files:', error);
-            alert('定義ファイル(traits.json/items.json)の読み込みに失敗しました。');
+            alert('定義ファイル(traits.json/items.json/addon_attributes.json)の読み込みに失敗しました。');
         }
         // 初期言語を設定 (ブラウザの言語が日本語なら日本語、それ以外は英語)
         setLanguage(navigator.language.startsWith('ja') ? 'ja' : 'en');
@@ -1007,13 +1019,25 @@ document.addEventListener('DOMContentLoaded', () => {
         item.className = 'add-attr-item';
 
         // Type
-        const typeLabel = document.createElement('label');
-        typeLabel.textContent = i18n[currentLang].equip_attr_type;
-        const typeInput = document.createElement('input');
-        typeInput.type = 'number';
-        typeInput.value = attr.type;
-        typeInput.dataset.key = 'type';
-        typeInput.addEventListener('input', updateJsonEditorFromInputs);
+        const typeSelect = document.createElement('select');
+        typeSelect.dataset.key = 'type';
+        if (addonAttrData) {
+            Object.keys(addonAttrData).forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${getAddonAttrName(id, currentLang)} (${id})`;
+                typeSelect.appendChild(option);
+            });
+        }
+        // 現在の値がリストにない場合、不明オプションとして追加
+        if (!addonAttrData || !addonAttrData[attr.type]) {
+            const unknownOption = document.createElement('option');
+            unknownOption.value = attr.type;
+            unknownOption.textContent = `${i18n[currentLang].unknown_option} (${attr.type})`;
+            typeSelect.appendChild(unknownOption);
+        }
+        typeSelect.value = attr.type;
+        typeSelect.addEventListener('change', updateJsonEditorFromInputs);
 
         // Value
         const valueLabel = document.createElement('label');
@@ -1046,7 +1070,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateJsonEditorFromInputs(); 
         };
 
-        item.append(typeLabel, typeInput, valueLabel, valueInput, levelAlterLabel, levelAlterInput, removeBtn);
+        item.append(typeSelect, valueLabel, valueInput, levelAlterLabel, levelAlterInput, removeBtn);
         parent.appendChild(item);
     }
 
@@ -1453,12 +1477,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const addAttrs = [];
                 const attrItems = slotContainer.querySelectorAll('.add-attr-item');
                 attrItems.forEach(item => {
-                    const typeInput = item.querySelector('input[data-key="type"]');
+                    const typeSelect = item.querySelector('select[data-key="type"]');
                     const valueInput = item.querySelector('input[data-key="value"]');
                     const levelAlterInput = item.querySelector('input[data-key="levelAlter"]');
-                    if (typeInput && valueInput && levelAlterInput) {
+                    if (typeSelect && valueInput && levelAlterInput) {
                         addAttrs.push({
-                            type: parseInt(typeInput.value) || 0,
+                            type: parseInt(typeSelect.value) || 0,
                             value: parseFloat(valueInput.value) || 0,
                             levelAlter: parseInt(levelAlterInput.value) || 0
                         });
