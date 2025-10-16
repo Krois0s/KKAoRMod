@@ -10,7 +10,7 @@ internal static class ModInfo
 {
     internal const string Guid = "kk.aor.nonegativetraits";
     internal const string Name = "KK No Negative Traits";
-    internal const string Version = "1.0.0";
+    internal const string Version = "1.0.1";
 }
 
 [BepInPlugin(ModInfo.Guid, ModInfo.Name, ModInfo.Version)]
@@ -38,18 +38,32 @@ public class NoNegativeTraitsMod : BaseUnityPlugin
             "e.g., Bully,Lofty,FearOfTheStrong" // 設定ファイルに書かれる説明文
         );
         
-        // 2. 読み込んだ設定文字列を、使いやすいリスト形式に変換します
+        // 2. 設定変更を監視し、変更があった場合にリストを更新するようにします
+        BlockedTraitNames.SettingChanged += (sender, args) => UpdateBlockedTraitsList();
+
+        // 3. 初期ロード時にリストを生成します
+        UpdateBlockedTraitsList();
+
+        harmony.PatchAll();
+        Log.LogInfo("No Negative Traits mod has been loaded and patched!");
+    }
+
+    void OnDestroy()
+    {
+        harmony.UnpatchSelf();
+        Log.LogInfo("No Negative Traits mod has been unloaded.");
+    }
+
+    private static void UpdateBlockedTraitsList()
+    {
+        // 読み込んだ設定文字列を、使いやすいリスト形式に変換します
         //    "Bully,Lofty" -> ["Bully", "Lofty"]
         blockedTraitsList = BlockedTraitNames.Value
             .Split(',')
             .Select(name => name.Trim()) // 前後の空白を削除
             .Where(name => !string.IsNullOrEmpty(name)) // 空の項目を削除
             .ToList();
-
         Log.LogInfo($"The following traits will be blocked: {string.Join(", ", blockedTraitsList)}");
-
-        harmony.PatchAll();
-        Log.LogInfo("No Negative Traits mod has been loaded and patched!");
     }
     
     // パッチ側から、変換済みのリストにアクセスするためのヘルパーメソッド
