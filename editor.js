@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             important_backup_and_disclaimer: "・編集前に必ずセーブデータのバックアップを取ってください、セーブデータの破損について一切の責任を負いません。",
             important_unknown_effects: "・各項目の変更がゲームに与える影響は未知数です。予期せぬ動作を引き起こす可能性があります。",
             important_no_official_contact: "・このツールで編集したセーブデータに起因する不具合について、公式開発元へのお問い合わせは絶対に行わないでください。",
-            important_conversion_feature_note: "・1.06b→1.10aセーブデータ変換機能を追加しました。1.10aでセーブが読み込めない方はエディタでsav.datを読み込み、何もせず保存してください。<br>※あくまで私の環境のセーブデータで発生した事象の対策なので、人によっては解決しないかもしれません",
+            important_conversion_feature_note: "<del>・1.06b→1.10aセーブデータ変換機能を追加しました。1.10aでセーブが読み込めない方はエディタでsav.datを読み込み、何もせず保存してください。</del><br><b>【追記】</b>公式にアップデートがあり、ロードできない問題に対処したようですので上記の機能は削除しました。",
             important_bug_report: "・<a href=\"https://steamcommunity.com/sharedfiles/filedetails/?id=3578740904\" target=\"_blank\" data-i18n=\"bug_report_link\">不具合報告</a>は<del>私がAoRに飽きるまで</del>歓迎します",
             bug_report_link: "不具合報告",
             load_instruction: "下記のセーブデータを読み込んでください。<br><code>C:\\Users\\<b><i>{ユーザー名}</i></b>\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\<b><i>{キャラクター名}</i></b>\\SaveData\\<b><i>{セーブデータ名}</i></b>\\sav.dat</code>",
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             important_backup_and_disclaimer: "・Always back up your save data before editing. We are not responsible for any save data corruption.",
             important_unknown_effects: "・The effects of changing each item on the game are unknown. It may cause unexpected behavior.",
             important_no_official_contact: "・Do not contact the official developers about any issues caused by save data edited with this tool.",
-            important_conversion_feature_note: "・Added a save data conversion feature for v1.06b to v1.10a. If you cannot load your save in v1.10a, please load the sav.dat file with this editor and save it without making any changes.<br>*Please note that this is a fix for an issue that occurred with my own save data, so it may not resolve the problem for everyone.",
+            important_conversion_feature_note: "<del>・Added a save data conversion feature for v1.06b to v1.10a. If you cannot load your save in v1.10a, please load the sav.dat file with this editor and save it without making any changes.</del><br><b>[Update]</b> It seems an official update has addressed the issue with loading saves, so the above feature has been removed.",
             important_bug_report: "・<a href=\"https://steamcommunity.com/sharedfiles/filedetails/?id=3578740904\" target=\"_blank\" data-i18n=\"bug_report_link\">Bug reports</a> are welcome <del>until I get bored of AoR</del>",
             bug_report_link: "Bug reports",
             load_instruction: "Please load the following save data.<br><code>C:\\Users\\<b><i>{username}</i></b>\\AppData\\LocalLow\\PersonaeGames\\Age of Reforging The Freelands\\Save\\<b><i>{character_name}</i></b>\\SaveData\\<b><i>{save_name}</i></b>\\sav.dat</code>",
@@ -1587,18 +1587,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const editedNpcData = JSON.parse(jsonEditor.value);
             fullSaveData.npcs[npcSelector.value] = editedNpcData;
-
-            // ★★★ AoR v1.10a 互換性対応: Faction名の 'BTA' を 'arenaLeague' に変換 ★★★
-            // fullSaveData.relation.factionFavorToPlayer オブジェクト内に 'BTA' キーが存在する場合のみ置換する
-            if (fullSaveData && fullSaveData.relation && fullSaveData.relation.factionFavorToPlayer &&
-                Object.prototype.hasOwnProperty.call(fullSaveData.relation.factionFavorToPlayer, 'BTA'))
-            {
-                console.log("古いFaction名 'BTA' を 'arenaLeague' に変換します。");
-                // BTAの値をarenaLeagueにコピー
-                fullSaveData.relation.factionFavorToPlayer.arenaLeague = fullSaveData.relation.factionFavorToPlayer.BTA;
-                // 古いBTAキーを削除
-                delete fullSaveData.relation.factionFavorToPlayer.BTA;
-            }
 
             let minifiedJsonString = JSON.stringify(fullSaveData);
             minifiedJsonString = escapeNonAscii(minifiedJsonString); // ゲームの形式に合わせてエスケープ
