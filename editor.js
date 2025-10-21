@@ -1588,6 +1588,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const editedNpcData = JSON.parse(jsonEditor.value);
             fullSaveData.npcs[npcSelector.value] = editedNpcData;
 
+            // ★★★ 下位互換性対応: Faction名の 'arenaLeague' を 'BTA' に戻す ★★★
+            // fullSaveData.relation.factionFavorToPlayer オブジェクト内に 'arenaLeague' キーが存在する場合のみ置換する
+            // 公式1.10aでBTAがarenaLeagueに変更されたため、ロードできない問題が発生したがコレに対応するため公式が再度EnumをBTAに戻した
+            // このエディタも逆に戻すことで互換性を保つよう変更
+            if (fullSaveData && fullSaveData.relation && fullSaveData.relation.factionFavorToPlayer &&
+                Object.prototype.hasOwnProperty.call(fullSaveData.relation.factionFavorToPlayer, 'arenaLeague'))
+            {
+                console.log("Faction名 'arenaLeague' を古い形式 'BTA' に変換します。");
+                // arenaLeagueの値をBTAにコピー
+                fullSaveData.relation.factionFavorToPlayer.BTA = fullSaveData.relation.factionFavorToPlayer.arenaLeague;
+                // 新しいarenaLeagueキーを削除
+                delete fullSaveData.relation.factionFavorToPlayer.arenaLeague;
+            }
+
+
             let minifiedJsonString = JSON.stringify(fullSaveData);
             minifiedJsonString = escapeNonAscii(minifiedJsonString); // ゲームの形式に合わせてエスケープ
             
