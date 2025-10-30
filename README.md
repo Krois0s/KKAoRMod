@@ -11,12 +11,12 @@ This is an unofficial collection of modification mods and tools designed to enha
 ## 対応バージョン / Tested Version
 
 このリポジトリのツール・MODは、以下のゲームバージョンで動作確認されています。
-*   **Age of Reforging v1.06b**
+*   **Age of Reforging v1.10b**
 
 これ以外のバージョンでは、正常に動作しない可能性があります。
 
 The tools and mods in this repository have been tested and confirmed to work with the following game version:
-*   **Age of Reforging v1.06b**
+*   **Age of Reforging v1.10b**
 
 They may not function correctly with other versions of the game.
 

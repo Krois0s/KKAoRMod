@@ -47,6 +47,10 @@
       <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\Age of Reforging The Freelands_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>H:\SteamLibrary\steamapps\common\Age of Reforging The Freelands\Age of Reforging The Freelands_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
 </Project>

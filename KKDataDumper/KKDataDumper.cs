@@ -8,6 +8,7 @@ using System.Text;
 using System.Collections.Generic; 
 using UnityEngine;
 using I2.Loc;
+using UMA; // UMATextRecipe を使用するために追加
 
 internal static class ModInfo
 {
@@ -89,7 +90,12 @@ public class KKDataDumper : BaseUnityPlugin
             DumpAddonAttributes(versionFolderPath);
             DumpSpells(versionFolderPath);
             DumpBuffs(versionFolderPath);
+            DumpUmaRecipes(versionFolderPath); // ★★★ UMAレシピのダンプ処理を呼び出し ★★★
+            DumpRaceData(versionFolderPath); // ★★★ RaceDataのダンプ処理を呼び出し ★★★
+            DumpDnaConverters(versionFolderPath); // ★★★ DNAコンバーターのダンプ処理を呼び出し ★★★
             DumpLocalizationData(versionFolderPath);
+            DumpBaseRaceRecipes(versionFolderPath); // ★★★ ベースレシピのダンプ処理を呼び出し ★★★
+            DumpSlotDataAssets(versionFolderPath); // ★★★ SlotDataAssetのダンプ処理を呼び出し ★★★
 
             Log.LogInfo("All data dump tasks complete for new version.");
         }
@@ -328,15 +334,14 @@ public class KKDataDumper : BaseUnityPlugin
         }
 
         var csv = new StringBuilder();
-        csv.AppendLine("ID,BuffType,Description");
+        csv.AppendLine("ID,BuffType,Description"); // ヘッダーを Name を含まない形に修正
 
         foreach (var buffInfo in UIBuffDatabase.Instance.buffs)
         {
             if (buffInfo == null) continue;
 
-            // string.Formatから "buffInfo.Name" を削除
-            var line = string.Format("\"{0}\",{1},\"{2}\"",
-                buffInfo.id, // .id がプログラム名（ID）です
+            var line = string.Format("{0},{1},\"{2}\"", // Nameプロパティへの参照を削除
+                buffInfo.id,
                 buffInfo.type,
                 buffInfo.description.Replace("\"", "\"\""));
             csv.AppendLine(line);
@@ -347,6 +352,214 @@ public class KKDataDumper : BaseUnityPlugin
         Log.LogInfo($"  -> Dumped {UIBuffDatabase.Instance.buffs.Length} Buffs to {filePath}");
     }
     
+    // ▼▼▼ ここに新しい関数を追加します ▼▼▼
+    private void DumpUmaRecipes(string outputDirectory)
+    {
+        // UMAAssetIndexerはUMAのコアコンポーネントで、アセットのインデックスを管理します。
+        var assetIndexer = UMAAssetIndexer.Instance;
+        if (assetIndexer == null)
+        {
+            Log.LogError("DumpUmaRecipes: UMAAssetIndexer not found!");
+            return;
+        }
+
+        // GetAllAssets<T> を使って、ロードされている全ての UMATextRecipe を取得します。
+        var allRecipes = assetIndexer.GetAllAssets<UMATextRecipe>(); // 戻り値は List<UMATextRecipe>
+
+        if (allRecipes.Count == 0) // List<T> の要素数は .Count で取得
+        {
+            Log.LogWarning("DumpUmaRecipes: No UMATextRecipe assets found.");
+            return;
+        }
+
+        var csv = new StringBuilder();
+        // 出力する情報を定義します。特に wardrobeSlot が重要です。
+        csv.AppendLine("RecipeName,WardrobeSlot,DisplayName,CompatibleRaces,SuppressSlots");
+
+        foreach (var recipe in allRecipes)
+        {
+            if (recipe == null) continue;
+
+            var compatibleRaces = string.Join(";", recipe.compatibleRaces ?? new List<string>());
+            var suppressSlots = string.Join(";", recipe.suppressWardrobeSlots ?? new List<string>());
+            
+            var line = string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\",\"{4}\"",
+                recipe.name, recipe.wardrobeSlot, recipe.DisplayValue, compatibleRaces, suppressSlots);
+            csv.AppendLine(line);
+        }
+
+        string filePath = Path.Combine(outputDirectory, "UmaRecipe_List.csv");
+        File.WriteAllText(filePath, csv.ToString());
+        Log.LogInfo($"  -> Dumped {allRecipes.Count} UMA Recipes to {filePath}"); // ここも .Count に修正
+    }
+
+    // ▼▼▼ ここに新しい関数を追加します ▼▼▼
+    private void DumpRaceData(string outputDirectory)
+    {
+        var assetIndexer = UMAAssetIndexer.Instance;
+        if (assetIndexer == null)
+        {
+            Log.LogError("DumpRaceData: UMAAssetIndexer not found!");
+            return;
+        }
+
+        var allRaces = assetIndexer.GetAllAssets<RaceData>();
+        if (allRaces.Count == 0)
+        {
+            Log.LogWarning("DumpRaceData: No RaceData assets found.");
+            return;
+        }
+
+        var csv = new StringBuilder();
+        csv.AppendLine("RaceName,IsDefaultWardrobe,RecipeName,WardrobeSlot");
+
+        int totalRecipesDumped = 0;
+        foreach (var race in allRaces)
+        {
+            // 修正: 'baseRaceRecipe' は UMARecipeBase 型であり、'wardrobeSet' を持たない。
+            // 'baseRaceRecipe' を UMATextRecipe にキャストして、それがデフォルト装備のレシピであるか確認する。
+            if (race == null || race.baseRaceRecipe == null) continue;
+
+            // 'baseRaceRecipe' を UMATextRecipe 型に安全にキャストします。
+            // キャストに成功した場合、defaultRecipe 変数にその値が格納されます。
+            if (race.baseRaceRecipe is UMATextRecipe defaultRecipe)
+            {
+
+                // UMATextRecipe であれば、その情報を直接出力する
+                if (!string.IsNullOrEmpty(defaultRecipe.wardrobeSlot))
+                {
+                    var line = string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\"",
+                        race.raceName, "Yes", defaultRecipe.name, defaultRecipe.wardrobeSlot);
+                    csv.AppendLine(line);
+                    totalRecipesDumped++;
+                }
+            }
+        }
+
+        string filePath = Path.Combine(outputDirectory, "RaceData_DefaultWardrobe.csv");
+        File.WriteAllText(filePath, csv.ToString());
+        Log.LogInfo($"  -> Dumped {totalRecipesDumped} default wardrobe recipes from {allRaces.Count} races to {filePath}");
+    }
+
+    // ▼▼▼ ここに新しい関数を追加します ▼▼▼
+    private void DumpDnaConverters(string outputDirectory)
+    {
+        var assetIndexer = UMAAssetIndexer.Instance;
+        if (assetIndexer == null)
+        {
+            Log.LogError("DumpDnaConverters: UMAAssetIndexer not found!");
+            return;
+        }
+
+        var allRaces = assetIndexer.GetAllAssets<RaceData>();
+        if (allRaces.Count == 0)
+        {
+            Log.LogWarning("DumpDnaConverters: No RaceData assets found.");
+            return;
+        }
+
+        string dnaConverterDir = Path.Combine(outputDirectory, "DnaConverters");
+        Directory.CreateDirectory(dnaConverterDir);
+
+        int totalDumped = 0;
+        foreach (var race in allRaces)
+        {
+            if (race == null || race.dnaRanges == null) continue;
+
+            for (int i = 0; i < race.dnaRanges.Length; i++)
+            {
+                var dnaRange = race.dnaRanges[i];
+                if (dnaRange == null) continue;
+
+                string json = UnityEngine.JsonUtility.ToJson(dnaRange, true); // 完全修飾名に修正
+                string fileName = $"{race.raceName}_dnaRange_{i}.json";
+                File.WriteAllText(Path.Combine(dnaConverterDir, fileName), json);
+                totalDumped++;
+            }
+        }
+        Log.LogInfo($"  -> Dumped {totalDumped} DNA Converters from {allRaces.Count} races to '{dnaConverterDir}'");
+    }
+
+    // ▼▼▼ ここに新しい関数を追加します ▼▼▼
+    private void DumpBaseRaceRecipes(string outputDirectory)
+    {
+        Log.LogInfo("Dumping all Base Race Recipes...");
+        var assetIndexer = UMAAssetIndexer.Instance;
+        if (assetIndexer == null)
+        {
+            Log.LogError("DumpBaseRaceRecipes: UMAAssetIndexer not found!");
+            return;
+        }
+
+        var allRaces = assetIndexer.GetAllAssets<RaceData>();
+        if (allRaces.Count == 0)
+        {
+            Log.LogWarning("DumpBaseRaceRecipes: No RaceData assets found.");
+            return;
+        }
+
+        string baseRecipeDir = Path.Combine(outputDirectory, "BaseRaceRecipes");
+        Directory.CreateDirectory(baseRecipeDir);
+
+        int totalDumped = 0;
+        foreach (var race in allRaces)
+        {
+            if (race == null || race.baseRaceRecipe == null) continue;
+
+            // baseRaceRecipe を UMATextRecipe にキャスト
+            if (race.baseRaceRecipe is UMATextRecipe baseRecipe)
+            {
+                // recipeString (JSON文字列) が空でなければファイルに保存
+                if (!string.IsNullOrEmpty(baseRecipe.recipeString))
+                {
+                    string fileName = $"{race.raceName}_BaseRecipe.json";
+                    File.WriteAllText(Path.Combine(baseRecipeDir, fileName), baseRecipe.recipeString);
+                    totalDumped++;
+                }
+            }
+        }
+        Log.LogInfo($"  -> Dumped {totalDumped} Base Race Recipes to '{baseRecipeDir}'");
+    }
+
+    // ▼▼▼ ここに新しい関数を追加します ▼▼▼
+    private void DumpSlotDataAssets(string outputDirectory)
+    {
+        Log.LogInfo("Dumping all SlotDataAssets...");
+        var assetIndexer = UMAAssetIndexer.Instance;
+        if (assetIndexer == null)
+        {
+            Log.LogError("DumpSlotDataAssets: UMAAssetIndexer not found!");
+            return;
+        }
+
+        // UMAAssetIndexerから全てのSlotDataAssetを取得します
+        var allSlots = assetIndexer.GetAllAssets<SlotDataAsset>();
+
+        if (allSlots.Count == 0)
+        {
+            Log.LogWarning("DumpSlotDataAssets: No SlotDataAsset assets found.");
+            return;
+        }
+
+        var csv = new StringBuilder();
+        csv.AppendLine("SlotName,SlotID,Races,Tags");
+
+        foreach (var slot in allSlots)
+        {
+            if (slot == null) continue;
+
+            string tags = (slot.tags != null) ? string.Join(";", slot.tags) : "";
+            string races = (slot.Races != null) ? string.Join(";", slot.Races) : "";
+            var line = string.Format("\"{0}\",\"{1}\",\"{2}\",\"{3}\"",
+                slot.name, slot.slotName, races, tags);
+            csv.AppendLine(line);
+        }
+
+        string filePath = Path.Combine(outputDirectory, "SlotDataAsset_List.csv");
+        File.WriteAllText(filePath, csv.ToString());
+        Log.LogInfo($"  -> Dumped {allSlots.Count} SlotDataAssets to {filePath}");
+    }
+
 private void DumpLocalizationData(string outputDirectory)
 {
     Log.LogInfo("Dumping all Localization data...");
